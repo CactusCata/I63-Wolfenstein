@@ -2,6 +2,19 @@ from utils.vec2D import Vec2D
 
 from tkinter import Tk
 
+ONE_USE_TAG = "ONE_USE_TAG"
+ONE_USE_TAG_TUPLE = (ONE_USE_TAG,)
+
+DEFINITIVE_USE_TAG_0 = "DEFINITIVE_USE_TAG_0"
+DEFINITIVE_USE_TAG_TUPLE_0 = (DEFINITIVE_USE_TAG_0,)
+
+DEFINITIVE_USE_TAG_1 = "DEFINITIVE_USE_TAG_1"
+DEFINITIVE_USE_TAG_TUPLE_1 = (DEFINITIVE_USE_TAG_1,)
+
+DEFINITIVE_USE_TAG_2 = "DEFINITIVE_USE_TAG_2"
+DEFINITIVE_USE_TAG_TUPLE_2 = (DEFINITIVE_USE_TAG_2,)
+
+
 def place_window(root:Tk, screen_dimensions:Vec2D):
     screenWidth = root.winfo_screenwidth()
     screenHeight = root.winfo_screenheight()

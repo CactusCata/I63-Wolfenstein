@@ -2,11 +2,14 @@ from enum import Enum
 from tkinter import Canvas
 from utils.vec2D import Vec2D
 
+from utils.tkUtils import DEFINITIVE_USE_TAG_TUPLE_2
+
 def draw_mini_map_air(canvas:Canvas, upleft_corner:Vec2D, downright_corner:Vec2D):
     pass
 
 def draw_mini_map_wall(canvas:Canvas, upleft_corner:Vec2D, downright_corner:Vec2D):
-    canvas.create_rectangle(upleft_corner[0], upleft_corner[1], downright_corner[0], downright_corner[1], fill="black")
+    canvas.create_rectangle(upleft_corner[0], upleft_corner[1], downright_corner[0], downright_corner[1], fill="black",
+                                      tags=DEFINITIVE_USE_TAG_TUPLE_2)
 
 class BlockType(Enum):
 

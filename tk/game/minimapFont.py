@@ -7,8 +7,9 @@ from entity.player import PLAYER_SIZE_X, PLAYER_SIZE_Y
 from world.blockType import BlockType
 import game.option as option
 import utils.mathUtils as mathUtils
+from utils.tkUtils import ONE_USE_TAG_TUPLE, DEFINITIVE_USE_TAG_TUPLE_2
 
-class Minimap:
+class MinimapFont:
 
     def __init__(self, game:Game, canvas:Canvas, upleft_corner:Vec2D, downright_corner:Vec2D):
         self.__game = game
@@ -20,32 +21,27 @@ class Minimap:
         self.__to_add_y = (downright_corner[1] - upleft_corner[1]) / WORLD_DIM_Y
 
         self.__player_draw_id = -1
-        self.__grid_lines_draw_id = []
-        self.__blocks_draw_id = []
-        self.__beams_draw_id = []
 
     def get_player_hitbox_tk(self):
         return self.__canvas.coords(self.__player_draw_id)
 
-    def draw_minimap(self):
+    def draw(self):
         self.draw_minimap_background()
         self.draw_minimap_grid()
         self.draw_minimap_blocks()
         self.draw_minimap_player()
         self.draw_beams()
 
-    def clear_all(self):
-        self.__canvas.delete("all")
-        self.__grid_lines_draw_id.clear()
-        self.__blocks_draw_id.clear()
-        self.__beams_draw_id.clear()
+    def redraw(self):
+        self.draw_beams()
 
     def draw_minimap_background(self):
         self.__canvas.create_rectangle(self.__upleft_corner[0], 
                                        self.__upleft_corner[1], 
                                        self.__downright_corner[0], 
                                        self.__downright_corner[1],
-                                       fill="white"
+                                       fill="white",
+                                       tags=DEFINITIVE_USE_TAG_TUPLE_2
                                        )
 
     #####################
@@ -58,7 +54,8 @@ class Minimap:
                                     (player_pos[1] - 1/2 * PLAYER_SIZE_Y) * self.__to_add_y + self.__upleft_corner[1], 
                                     (player_pos[0] + 1/2 * PLAYER_SIZE_X) * self.__to_add_x + self.__upleft_corner[0], 
                                     (player_pos[1] + 1/2 * PLAYER_SIZE_Y) * self.__to_add_y + self.__upleft_corner[1], 
-                                    fill="red")
+                                    fill="red",
+                                    tags=DEFINITIVE_USE_TAG_TUPLE_2)
         
     def update_minimap_player_move(self, dxy:Vec2D):
         if self.__player_draw_id == -1:
@@ -75,10 +72,9 @@ class Minimap:
             current_x = self.__upleft_corner[0]
             for x in range(WORLD_DIM_X):
                 block_type = world.world_matrix[y][x]
-                block_id = block_type.value[2](self.__canvas, 
+                block_type.value[2](self.__canvas, 
                                     Vec2D(current_x, current_y),
                                     Vec2D(current_x + self.__to_add_x, current_y + self.__to_add_y))
-                self.__blocks_draw_id.append(block_id)
                 current_x += self.__to_add_x
             current_y += self.__to_add_y
 
@@ -88,27 +84,26 @@ class Minimap:
     def draw_minimap_grid(self):
         current_y = self.__upleft_corner[1]
         for line in range(WORLD_DIM_Y + 1):
-            line_id = self.__canvas.create_line(self.__upleft_corner[0], 
+            self.__canvas.create_line(self.__upleft_corner[0], 
                                            current_y,
                                            self.__downright_corner[0],
-                                           current_y)
-            self.__grid_lines_draw_id.append(line_id)
+                                           current_y,
+                                           tags=DEFINITIVE_USE_TAG_TUPLE_2)
             current_y += self.__to_add_y
 
         current_x = self.__upleft_corner[0]
         for col in range(WORLD_DIM_X + 1):
-            col_id = self.__canvas.create_line(current_x, 
+            self.__canvas.create_line(current_x, 
                                            self.__upleft_corner[1], 
                                            current_x, 
-                                           self.__downright_corner[1])
-            self.__grid_lines_draw_id.append(col_id)
+                                           self.__downright_corner[1],
+                                           tags=DEFINITIVE_USE_TAG_TUPLE_2)
             current_x += self.__to_add_x
 
     #################
     #   Dessin dda  #
     #################
     def draw_beams(self):
-        self.clear_beams()
         fov = option.OPTION.get_fov()
         player_rotation = self.__game.get_world().get_player().get_rotation()
         #self.draw_beam(player_rotation - fov // 2)
@@ -161,24 +156,20 @@ class Minimap:
         while True:
             if div < dih: # On gère l'intersection verticale
                 if coef_v == 1 and world_matrix[int(ivy)][int(ivx)] == BlockType.WALL:
-                    beam_id = self.draw_line(player_pos, Vec2D(ivx, ivy), color="blue")
-                    self.__beams_draw_id.append(beam_id)
+                    self.draw_line(player_pos, Vec2D(ivx, ivy), color="blue")
                     return
                 elif coef_v == -1 and world_matrix[int(ivy)][int(ivx - 1)] == BlockType.WALL:
-                    beam_id = self.draw_line(player_pos, Vec2D(ivx, ivy), color="blue")
-                    self.__beams_draw_id.append(beam_id)
+                    self.draw_line(player_pos, Vec2D(ivx, ivy), color="blue")
                     return
                 ivx += coef_v
                 ivy += coef_v * tan_alpha
                 div = mathUtils.euclidian_distance(x, y, ivx, ivy)
             else: # On gère l'intersection horizontale
                 if coef_h == 1 and world_matrix[int(ihy)][int(ihx)] == BlockType.WALL:
-                    beam_id = self.draw_line(player_pos, Vec2D(ihx, ihy), color="blue")
-                    self.__beams_draw_id.append(beam_id)
+                    self.draw_line(player_pos, Vec2D(ihx, ihy), color="blue")
                     return
                 elif coef_h == -1 and world_matrix[int(ihy - 1)][int(ihx)] == BlockType.WALL:
-                    beam_id = self.draw_line(player_pos, Vec2D(ihx, ihy), color="blue")
-                    self.__beams_draw_id.append(beam_id)
+                    self.draw_line(player_pos, Vec2D(ihx, ihy), color="blue")
                     return
                 ihx += coef_h / tan_alpha
                 ihy += coef_h
@@ -204,11 +195,6 @@ class Minimap:
         self.__beams_draw_id.append(beam_id)
         """
 
-    def clear_beams(self):
-        for beam_id in self.__beams_draw_id:
-            self.__canvas.delete(beam_id)
-        self.__beams_draw_id.clear()
-
     #############
     #   Others  #
     #############
@@ -217,4 +203,5 @@ class Minimap:
                                          map_space_p1[1] * self.__to_add_y + self.__upleft_corner[1],
                                          map_space_p2[0] * self.__to_add_x + self.__upleft_corner[0],
                                          map_space_p2[1] * self.__to_add_y + self.__upleft_corner[1],
-                                         fill=color)
+                                         fill=color,
+                                         tags=ONE_USE_TAG_TUPLE)
