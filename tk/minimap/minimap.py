@@ -6,6 +6,7 @@ from math import sin, cos, tan, pi
 from entity.player import PLAYER_SIZE_X, PLAYER_SIZE_Y
 from world.blockType import BlockType
 import game.option as option
+import utils.mathUtils as mathUtils
 
 class Minimap:
 
@@ -136,15 +137,83 @@ class Minimap:
         self.clear_beams()
         fov = option.OPTION.get_fov()
         player_rotation = self.__game.get_world().get_player().get_rotation()
-        self.draw_beam(player_rotation - fov // 2)
+        #self.draw_beam(player_rotation - fov // 2)
         self.draw_beam(player_rotation)
-        self.draw_beam(player_rotation + fov // 2)
+        #self.draw_beam(player_rotation + fov // 2)
 
     def draw_beam(self, alpha):
+        alpha %= 360
+        tan_alpha = tan(alpha * pi / 180)
         world_matrix = self.__game.get_world().world_matrix
         player_pos = self.__game.get_world().get_player().get_pos()
         x = player_pos[0]
         y = player_pos[1]
+
+        ivx = 0
+        ivy = 0
+        ihx = 0
+        ihy = 0
+        coef_v = 1
+        coef_h = 1
+
+        if alpha < 90:
+            ivx = int(x) + 1
+            ivy = y + abs(x - ivx) * tan_alpha
+            ihy = int(y) + 1
+            ihx = x + abs(y - ihy) / tan_alpha
+        elif alpha < 180:
+            ivx = int(x)
+            ivy = y + abs(x - ivx) * tan_alpha * -1
+            ihy = int(y) + 1
+            ihx = x + abs(y - ihy) / tan_alpha
+            coef_v = -1
+        elif alpha < 270:
+            ivx = int(x)
+            ivy = y + abs(x - ivx) * tan_alpha * -1
+            ihy = int(y)
+            ihx = x + abs(y - ihy) / tan_alpha * -1
+            coef_v = -1
+            coef_h = -1
+        else:
+            ivx = int(x) + 1
+            ivy = y + abs(x - ivx) * tan_alpha
+            ihy = int(y)
+            ihx = x + abs(y - ihy) / tan_alpha * -1
+            coef_h = -1
+
+        div = mathUtils.euclidian_distance(x, y, ivx, ivy)
+        dih = mathUtils.euclidian_distance(x, y, ihx, ihy)
+
+        while True:
+            if div < dih: # On gère l'intersection verticale
+                if coef_v == 1 and world_matrix[int(ivy)][int(ivx)] == BlockType.WALL:
+                    beam_id = self.draw_line(player_pos, Vec2D(ivx, ivy), color="blue")
+                    self.__beams_draw_id.append(beam_id)
+                    return
+                elif coef_v == -1 and world_matrix[int(ivy)][int(ivx - 1)] == BlockType.WALL:
+                    beam_id = self.draw_line(player_pos, Vec2D(ivx, ivy), color="blue")
+                    self.__beams_draw_id.append(beam_id)
+                    return
+                ivx += coef_v
+                ivy += coef_v * tan_alpha
+                div = mathUtils.euclidian_distance(x, y, ivx, ivy)
+            else: # On gère l'intersection horizontale
+                if coef_h == 1 and world_matrix[int(ihy)][int(ihx)] == BlockType.WALL:
+                    beam_id = self.draw_line(player_pos, Vec2D(ihx, ihy), color="blue")
+                    self.__beams_draw_id.append(beam_id)
+                    return
+                elif coef_h == -1 and world_matrix[int(ihy - 1)][int(ihx)] == BlockType.WALL:
+                    beam_id = self.draw_line(player_pos, Vec2D(ihx, ihy), color="blue")
+                    self.__beams_draw_id.append(beam_id)
+                    return
+                ihx += coef_h / tan_alpha
+                ihy += coef_h
+                dih = mathUtils.euclidian_distance(x, y, ihx, ihy)
+
+
+
+
+        """
         
         vx = cos(alpha * pi / 180) / 16
         vy = sin(alpha * pi / 180) / 16
@@ -156,8 +225,10 @@ class Minimap:
                 x += vx
                 y += vy
 
+
         beam_id = self.draw_line(player_pos, Vec2D(x, y), color="blue")
         self.__beams_draw_id.append(beam_id)
+        """
 
     def clear_beams(self):
         for beam_id in self.__beams_draw_id:

@@ -4,6 +4,7 @@ from math import tan, cos, sin, pi, sqrt, exp
 import game.option as option
 from world.blockType import BlockType
 from utils.vec2D import Vec2D
+import utils.mathUtils as mathUtils
 
 class GameDrawer:
 
@@ -23,7 +24,12 @@ class GameDrawer:
         h = 0.7
 
         for col in range(screen_width):
-            distance = self.get_next_wall_distance((col * fov) / screen_width + player_rotation - 1/2 * fov)
+            angle = (col * fov) / screen_width + player_rotation - 1/2 * fov
+            distance = self.get_next_wall_distance(angle)
+            
+            # fix the "lentille effet"
+            distance = distance * cos((player_rotation - angle) * pi / 180)
+            
             r = h * (virtual_distance / distance)
             #self.__canvas.create_rectangle(col, (screen_height - r) // 2, col+1, (screen_height - r) // 2 + 1)
             #self.__canvas.create_rectangle(col, (screen_height + r) // 2, col+1, (screen_height + r) // 2 + 1)
@@ -34,15 +40,79 @@ class GameDrawer:
         res = 255 - int(255 * (1 - exp(-distance/3)))
         return f"#{res:02X}{res:02X}{res:02X}"
     
+    def get_next_wall_distance(self, alpha):
+        alpha %= 360
+        tan_alpha = tan(alpha * pi / 180)
+        world_matrix = self.__game.get_world().world_matrix
+        player_pos = self.__game.get_world().get_player().get_pos()
+        x = player_pos[0]
+        y = player_pos[1]
 
+        ivx = 0
+        ivy = 0
+        ihx = 0
+        ihy = 0
+        coef_v = 1
+        coef_h = 1
+
+        if alpha < 90:
+            ivx = int(x) + 1
+            ivy = y + abs(x - ivx) * tan_alpha
+            ihy = int(y) + 1
+            ihx = x + abs(y - ihy) / tan_alpha
+        elif alpha < 180:
+            ivx = int(x)
+            ivy = y + abs(x - ivx) * tan_alpha * -1
+            ihy = int(y) + 1
+            ihx = x + abs(y - ihy) / tan_alpha
+            coef_v = -1
+        elif alpha < 270:
+            ivx = int(x)
+            ivy = y + abs(x - ivx) * tan_alpha * -1
+            ihy = int(y)
+            ihx = x + abs(y - ihy) / tan_alpha * -1
+            coef_v = -1
+            coef_h = -1
+        else:
+            ivx = int(x) + 1
+            ivy = y + abs(x - ivx) * tan_alpha
+            ihy = int(y)
+            ihx = x + abs(y - ihy) / tan_alpha * -1
+            coef_h = -1
+
+        div = mathUtils.euclidian_distance(x, y, ivx, ivy)
+        dih = mathUtils.euclidian_distance(x, y, ihx, ihy)
+        
+        
+
+        while True:
+            if div < dih: # On gère l'intersection verticale
+                if coef_v == 1 and world_matrix[int(ivy)][int(ivx)] == BlockType.WALL:
+                    return div
+                elif coef_v == -1 and world_matrix[int(ivy)][int(ivx - 1)] == BlockType.WALL:
+                    return div
+                ivx += coef_v
+                ivy += coef_v * tan_alpha
+                div = mathUtils.euclidian_distance(x, y, ivx, ivy)
+            else: # On gère l'intersection horizontale
+                if coef_h == 1 and world_matrix[int(ihy)][int(ihx)] == BlockType.WALL:
+                    return dih
+                elif coef_h == -1 and world_matrix[int(ihy - 1)][int(ihx)] == BlockType.WALL:
+                    return dih
+                ihx += coef_h / tan_alpha
+                ihy += coef_h
+                dih = mathUtils.euclidian_distance(x, y, ihx, ihy)
+
+    
+    """
     def get_next_wall_distance(self, alpha):
         world_matrix = self.__game.get_world().world_matrix
         player_pos = self.__game.get_world().get_player().get_pos()
         x = player_pos[0]
         y = player_pos[1]
         
-        vx = cos(alpha * pi / 180) / 16
-        vy = sin(alpha * pi / 180) / 16
+        vx = cos(alpha * pi / 180) / 64
+        vy = sin(alpha * pi / 180) / 64
 
         while True:
             if world_matrix[int(y)][int(x)] == BlockType.WALL:
@@ -50,6 +120,7 @@ class GameDrawer:
             else:
                 x += vx
                 y += vy
+    """
 
 
 

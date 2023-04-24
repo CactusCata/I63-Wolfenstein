@@ -7,4 +7,5 @@ if __name__ == "__main__":
 
     game_frame = GameFrame()
     game_frame.enable_minimap(Vec2D(600, 10), Vec2D(600 + 200, 10 + 200))
+    #game_frame.enable_minimap(Vec2D(50, 10), Vec2D(50 + 500, 10 + 500))
     game_frame.run()
