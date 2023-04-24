@@ -20,7 +20,6 @@ class Minimap:
         self.__to_add_y = (downright_corner[1] - upleft_corner[1]) / WORLD_DIM_Y
 
         self.__player_draw_id = -1
-        self.__player_eyes_id = [-1, -1]
         self.__grid_lines_draw_id = []
         self.__blocks_draw_id = []
         self.__beams_draw_id = []
@@ -33,7 +32,6 @@ class Minimap:
         self.draw_minimap_grid()
         self.draw_minimap_blocks()
         self.draw_minimap_player()
-        self.draw_minimap_player_eyes()
         self.draw_beams()
 
     def clear_all(self):
@@ -62,34 +60,10 @@ class Minimap:
                                     (player_pos[1] + 1/2 * PLAYER_SIZE_Y) * self.__to_add_y + self.__upleft_corner[1], 
                                     fill="red")
         
-    def draw_minimap_player_eyes(self):
-        player = self.__game.get_world().get_player()
-        pos_eye_left_x = (player.get_pos()[0] + 1/2 + 0.8 * cos((player.get_rotation() * pi / 180) + pi/6)) * self.__to_add_x + self.__upleft_corner[0]
-        pos_eye_left_y = (player.get_pos()[1] + 1/2 + 0.8 * sin((player.get_rotation() * pi / 180) + pi/6)) * self.__to_add_y + self.__upleft_corner[1]
-        pos_eye_right_x = (player.get_pos()[0] + 1/2 + 0.8 * cos((player.get_rotation() * pi / 180) - pi/6)) * self.__to_add_x + self.__upleft_corner[0]
-        pos_eye_right_y = (player.get_pos()[1] + 1/2 + 0.8 * sin((player.get_rotation() * pi / 180) - pi/6)) * self.__to_add_y + self.__upleft_corner[1]
-        self.__player_eyes_id[0] = self.__canvas.create_rectangle(pos_eye_left_x, pos_eye_left_y, pos_eye_left_x + 1, pos_eye_left_y + 1)
-        self.__player_eyes_id[1] = self.__canvas.create_rectangle(pos_eye_right_x, pos_eye_right_y, pos_eye_right_x + 1, pos_eye_right_y + 1)
-        
     def update_minimap_player_move(self, dxy:Vec2D):
         if self.__player_draw_id == -1:
             self.draw_minimap_player()
         self.__canvas.move(self.__player_draw_id, dxy[0] * self.__to_add_x, dxy[1] * self.__to_add_y)
-        self.update_minimap_player_eyes(dxy=dxy)
-        
-        
-    def update_minimap_player_eyes(self, dxy:Vec2D=Vec2D(0, 0), drotation=0.0):
-        if self.__player_eyes_id == [-1, -1]:
-            self.draw_minimap_player_eyes()
-
-        if dxy != Vec2D(0, 0):
-            self.__canvas.move(self.__player_eyes_id[0], dxy[0] * self.__to_add_x, dxy[1] * self.__to_add_y)
-            self.__canvas.move(self.__player_eyes_id[1], dxy[0] * self.__to_add_x, dxy[1] * self.__to_add_y)
-        
-        if drotation != 0.0:
-            self.__canvas.delete(self.__player_eyes_id[0])
-            self.__canvas.delete(self.__player_eyes_id[1])
-            self.draw_minimap_player_eyes()
         
     ####################
     #   Dessin blocs   #
