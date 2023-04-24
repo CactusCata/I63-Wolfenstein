@@ -20,18 +20,20 @@ class GameDrawer:
         screen_height = option.OPTION.get_window_dimensions()[1]
         virtual_distance = (screen_width / 2) / (tan((fov/2) * pi / 180))
         
-        h = 1
+        h = 0.7
 
         for col in range(screen_width):
-            distance = self.get_next_wall_distance((col * fov * 1/2) / screen_width + player_rotation - 30/2)
+            distance = self.get_next_wall_distance((col * fov) / screen_width + player_rotation - 1/2 * fov)
             r = h * (virtual_distance / distance)
             #self.__canvas.create_rectangle(col, (screen_height - r) // 2, col+1, (screen_height - r) // 2 + 1)
             #self.__canvas.create_rectangle(col, (screen_height + r) // 2, col+1, (screen_height + r) // 2 + 1)
             self.__canvas.create_line(col, (screen_height - r) // 2, col+1, (screen_height + r) // 2, fill=self.get_color_from_distance(distance))
 
+    
     def get_color_from_distance(self, distance):
         res = 255 - int(255 * (1 - exp(-distance/3)))
         return f"#{res:02X}{res:02X}{res:02X}"
+    
 
     def get_next_wall_distance(self, alpha):
         world_matrix = self.__game.get_world().world_matrix

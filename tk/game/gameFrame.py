@@ -9,6 +9,7 @@ from minimap.minimap import Minimap
 from math import cos, sin, pi
 from world.world import WORLD_DIM_X, WORLD_DIM_Y
 from game.gameDrawer import GameDrawer
+import time
 
 import utils.tkUtils as tkUtils
 
@@ -33,9 +34,9 @@ class GameFrame:
         self.__game_drawer = GameDrawer(self.__canvas_game, self.__game)
         self.__player = self.__game.get_world().spawn_player(position=Vec2D(9.5, 9.5), rotation=110)
         self.__root.bind('z', lambda event: self.move_player(+PLAYER_STEP_SIZE))
-        self.__root.bind('q', lambda event: self.rotate_player(+3))
+        self.__root.bind('d', lambda event: self.rotate_player(+3))
         self.__root.bind('s', lambda event: self.move_player(-PLAYER_STEP_SIZE))
-        self.__root.bind('d', lambda event: self.rotate_player(-3))
+        self.__root.bind('q', lambda event: self.rotate_player(-3))
 
     def run(self):
         self.__root.mainloop()
@@ -62,16 +63,18 @@ class GameFrame:
         )
 
         
-        if player_square[0] != player_square[2] or player_square[1] != player_square[3]: # Le joueur a passé une ligne
-            rect = None
+        if player_square[0] != player_square[2]: # Le joueur a passé une ligne verticale
             if dxy[0] > 0:
-                rect = (player_square[0] + 1, player_square[1])
+                rect = (player_square[2], player_square[1])
             elif dxy[0] < 0:
                 rect = (player_square[0], player_square[1])
             if self.__game.get_world().world_matrix[rect[1]][rect[0]] == BlockType.WALL:
                 return
+            
+            
+        if player_square[1] != player_square[3]: # Le joueur a passé une ligne horizontale
             if dxy[1] > 0:
-                rect = (player_square[0], player_square[1])
+                rect = (player_square[0], player_square[3])
             else:
                 rect = (player_square[0], player_square[1])
 
