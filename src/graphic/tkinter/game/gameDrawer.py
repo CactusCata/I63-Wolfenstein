@@ -28,21 +28,26 @@ class GameDrawer:
 
     def draw_game(self):
         fov = option.OPTION.get_fov()
-        player_rotation = game.GAME.get_world().get_player().get_rotation()
+        player = game.GAME.get_world().get_player()
+        player_rotation = player.get_rotation()
+        player_pos = player.get_pos()
         screen_width = option.OPTION.get_window_dimensions()[0]
         screen_height = option.OPTION.get_window_dimensions()[1]
         virtual_distance = (screen_width / 2) / (tan((fov/2) * pi / 180))
 
+        # Texture à dessiner sur les murs
         font_image = spriteManager.FONT_IMG
         font_image_height = font_image.get_height()
         
+        # Hauteur des murs
         h = 0.7
 
-        to_print = False
-
         for col in range(screen_width):
+            # Angle du rayon par rapport au joueur
             angle = (col * fov) / screen_width + player_rotation - 1/2 * fov
-            distance, percent_wall = self.get_next_wall_distance(angle)
+
+
+            distance, percent_wall = self.get_next_wall_distance(player_pos, angle)
             
             # fix the "lentille effet"
             distance = distance * cos((player_rotation - angle) * pi / 180)
@@ -57,20 +62,23 @@ class GameDrawer:
             for pixel in wall_column:
                 wall_column_with_luminosity.append(f"#{int(pixel[0] * luminosity):02x}{int(pixel[1] * luminosity):02x}{int(pixel[2] * luminosity):02x}")
 
-            # print(f" = {}")
-            up = int((screen_height - r) // 2)
-            down = int((screen_height + r) // 2)
-            pixel_img_size = (down - up) / font_image_height
+            # Dessin de la ligne de `start_drawing` à `final_drawing`
+            start_drawing = int((screen_height - r) // 2)
+            final_drawing = int((screen_height + r) // 2)
+            # Taille verticale d'un pixel de l'image sur l'écran
+            pixel_img_size = (final_drawing - start_drawing) / font_image_height
+
+            # Pixels de debut et de fin à dessiner à l'écran
             current_pixel_drawing = 0
             end_pixel_drawing = font_image_height - 1
-            if up < 0:
-                pixels_not_needed_to_draw = int(-up / pixel_img_size)
+            if start_drawing < 0:
+                pixels_not_needed_to_draw = int(-start_drawing / pixel_img_size)
                 current_pixel_drawing = pixels_not_needed_to_draw
                 end_pixel_drawing = end_pixel_drawing - pixels_not_needed_to_draw
 
             current_color = wall_column_with_luminosity[current_pixel_drawing]
-            start_drawing = max(up, 0)
-            end_drawing = (current_pixel_drawing + 1) * pixel_img_size + up
+            end_drawing = (current_pixel_drawing + 1) * pixel_img_size + start_drawing
+            start_drawing = max(start_drawing, 0)
 
             while current_pixel_drawing < end_pixel_drawing:
                 if current_color == wall_column_with_luminosity[current_pixel_drawing + 1]:
@@ -92,7 +100,7 @@ class GameDrawer:
             self.__canvas.create_line(col, 
                                         start_drawing, 
                                         col,
-                                        end_drawing, 
+                                        end_drawing + 2, 
                                         tags=ONE_USE_TAG_TUPLE,
                                         fill=current_color
                                         )
@@ -103,11 +111,14 @@ class GameDrawer:
         return exp(-distance)
         #return "#" + str(f"{res:02X}") * 3
     
-    def get_next_wall_distance(self, alpha):
+    def get_next_wall_distance(self, player_pos:Vec2D, alpha:float):
+        """
+        Renvoie la distance entre le joueur et le prochain
+        mur touché avec l'angle alpha
+        """
         alpha %= 360
         tan_alpha = tan(alpha * pi / 180)
         world_matrix = game.GAME.get_world().world_matrix
-        player_pos = game.GAME.get_world().get_player().get_pos()
         x = player_pos[0]
         y = player_pos[1]
 
