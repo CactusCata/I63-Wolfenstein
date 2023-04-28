@@ -7,6 +7,7 @@ from logic.utils.vec2D import Vec2D
 import logic.game.game as game
 import logic.game.option as option
 import logic.utils.mathUtils as mathUtils
+import logic.sprite.spriteManager as spriteManager
 
 
 from graphic.utils.tkUtils import ONE_USE_TAG_TUPLE, DEFINITIVE_USE_TAG_TUPLE_0
@@ -31,28 +32,76 @@ class GameDrawer:
         screen_width = option.OPTION.get_window_dimensions()[0]
         screen_height = option.OPTION.get_window_dimensions()[1]
         virtual_distance = (screen_width / 2) / (tan((fov/2) * pi / 180))
+
+        font_image = spriteManager.FONT_IMG
+        font_image_height = font_image.get_height()
         
         h = 0.7
 
+        to_print = False
+
         for col in range(screen_width):
             angle = (col * fov) / screen_width + player_rotation - 1/2 * fov
-            distance = self.get_next_wall_distance(angle)
+            distance, percent_wall = self.get_next_wall_distance(angle)
             
             # fix the "lentille effet"
             distance = distance * cos((player_rotation - angle) * pi / 180)
             
             r = h * (virtual_distance / distance)
-            
+
+            wall_column = spriteManager.FONT_IMG.get_vertical_band(percent_wall)
+
+            # Pourcentage de luminosité en fonction de la distance
+            luminosity = self.get_luminosity_from_distance(distance)
+            wall_column_with_luminosity = []
+            for pixel in wall_column:
+                wall_column_with_luminosity.append(f"#{int(pixel[0] * luminosity):02x}{int(pixel[1] * luminosity):02x}{int(pixel[2] * luminosity):02x}")
+
+            # print(f" = {}")
+            up = int((screen_height - r) // 2)
+            down = int((screen_height + r) // 2)
+            pixel_img_size = (down - up) / font_image_height
+            current_pixel_drawing = 0
+            end_pixel_drawing = font_image_height - 1
+            if up < 0:
+                pixels_not_needed_to_draw = int(-up / pixel_img_size)
+                current_pixel_drawing = pixels_not_needed_to_draw
+                end_pixel_drawing = end_pixel_drawing - pixels_not_needed_to_draw
+
+            current_color = wall_column_with_luminosity[current_pixel_drawing]
+            start_drawing = max(up, 0)
+            end_drawing = (current_pixel_drawing + 1) * pixel_img_size + up
+
+            while current_pixel_drawing < end_pixel_drawing:
+                if current_color == wall_column_with_luminosity[current_pixel_drawing + 1]:
+                    end_drawing += pixel_img_size
+                else:
+                    self.__canvas.create_line(col, 
+                                              start_drawing, 
+                                              col,
+                                              end_drawing, 
+                                              tags=ONE_USE_TAG_TUPLE,
+                                              fill=current_color
+                                              )
+                    current_color = wall_column_with_luminosity[current_pixel_drawing + 1]
+                    start_drawing = end_drawing
+                    end_drawing = start_drawing + pixel_img_size
+                current_pixel_drawing += 1
+
+
             self.__canvas.create_line(col, 
-                                      (screen_height - r) // 2, 
-                                      col, (screen_height + r) // 2, 
-                                      fill=self.get_color_from_distance(distance),
-                                      tags=ONE_USE_TAG_TUPLE)
+                                        start_drawing, 
+                                        col,
+                                        end_drawing, 
+                                        tags=ONE_USE_TAG_TUPLE,
+                                        fill=current_color
+                                        )
+        
 
     
-    def get_color_from_distance(self, distance):
-        res = int(255 * exp(-distance))
-        return "#" + str(f"{res:02X}") * 3
+    def get_luminosity_from_distance(self, distance):
+        return exp(-distance)
+        #return "#" + str(f"{res:02X}") * 3
     
     def get_next_wall_distance(self, alpha):
         alpha %= 360
@@ -116,14 +165,14 @@ class GameDrawer:
         while True:
             if div < dih: # On gère l'intersection verticale
                 if world_matrix[int(ivy)][int(ivx + magic_v)] == BlockType.WALL:
-                    return div
+                    return div, (ivy % 1)
                 ivx += to_add_vx
                 ivy += to_add_vy
                 div += distance_to_add_v
                 #div = mathUtils.euclidian_distance(x, y, ivx, ivy)
             else: # On gère l'intersection horizontale
                 if world_matrix[int(ihy + magic_h)][int(ihx)] == BlockType.WALL:
-                    return dih
+                    return dih, (ihx % 1)
                 ihx += to_add_hx
                 ihy += to_add_hy
                 dih += distance_to_add_h

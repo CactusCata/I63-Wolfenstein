@@ -1,4 +1,4 @@
-from math import sqrt, pow
+from math import sqrt
 
 def euclidian_distance(x1, y1, x2, y2):
     dy = y2 - y1

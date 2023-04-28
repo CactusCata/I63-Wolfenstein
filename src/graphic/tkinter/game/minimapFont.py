@@ -178,25 +178,6 @@ class MinimapFont:
                 dih = mathUtils.euclidian_distance(x, y, ihx, ihy)
 
 
-
-
-        """
-        
-        vx = cos(alpha * pi / 180) / 16
-        vy = sin(alpha * pi / 180) / 16
-
-        while True:
-            if world_matrix[int(y)][int(x)] == BlockType.WALL:
-                break
-            else:
-                x += vx
-                y += vy
-
-
-        beam_id = self.draw_line(player_pos, Vec2D(x, y), color="blue")
-        self.__beams_draw_id.append(beam_id)
-        """
-
     #############
     #   Others  #
     #############

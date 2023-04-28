@@ -91,7 +91,7 @@ class OGLDrawer(OpenGLFrame):
 
         tm = time.time() - self.start
         self.nframes += 1
-        print("fps",self.nframes / tm, end="\r" )
+        #print("fps",self.nframes / tm, end="\r" )
 
     def draw_wall(self):
         #
