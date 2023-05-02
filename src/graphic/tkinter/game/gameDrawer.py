@@ -19,7 +19,6 @@ class GameDrawer:
         
 
     def draw(self):
-        self.draw_background()
         self.draw_game()
 
     def redraw(self):
@@ -38,9 +37,11 @@ class GameDrawer:
         # Texture à dessiner sur les murs
         font_image = spriteManager.FONT_IMG
         font_image_height = font_image.get_height()
+
+        view_distance = option.OPTION.get_view_distance()
         
         # Hauteur des murs
-        h = 0.7
+        h = 1.0
 
         for col in range(screen_width):
             # Angle du rayon par rapport au joueur
@@ -57,7 +58,7 @@ class GameDrawer:
             wall_column = spriteManager.FONT_IMG.get_vertical_band(percent_wall)
 
             # Pourcentage de luminosité en fonction de la distance
-            luminosity = self.get_luminosity_from_distance(distance)
+            luminosity = max(option.OPTION.get_min_luminosity(), self.get_luminosity_from_distance(distance / (0.4 * view_distance)))
             wall_column_with_luminosity = []
             for pixel in wall_column:
                 wall_column_with_luminosity.append(f"#{int(pixel[0] * luminosity):02x}{int(pixel[1] * luminosity):02x}{int(pixel[2] * luminosity):02x}")
@@ -180,57 +181,12 @@ class GameDrawer:
                 ivx += to_add_vx
                 ivy += to_add_vy
                 div += distance_to_add_v
-                #div = mathUtils.euclidian_distance(x, y, ivx, ivy)
             else: # On gère l'intersection horizontale
                 if world_matrix[int(ihy + magic_h)][int(ihx)] == BlockType.WALL:
                     return dih, (ihx % 1)
                 ihx += to_add_hx
                 ihy += to_add_hy
                 dih += distance_to_add_h
-                #dih = mathUtils.euclidian_distance(x, y, ihx, ihy)
-
-    def draw_ground(self, band_amount=50):
-        window_dimensions = option.OPTION.get_window_dimensions()
-
-        hight_to_remove = window_dimensions[1] / (2 * (band_amount + 1))
-        current_hight = window_dimensions[1] - 1
-        x = 2
-        while current_hight >= window_dimensions[1] // 2:
-            red = exp(-x/25) * 255
-            self.__canvas.create_rectangle(0, 
-                                           current_hight, 
-                                           window_dimensions[0], 
-                                           current_hight - hight_to_remove, 
-                                           fill=f"#{int(red):02X}0000",
-                                           outline=f"#{int(red):02X}0000",
-                                           tags=DEFINITIVE_USE_TAG_TUPLE_0)
-            current_hight -= hight_to_remove
-            x *= 1.1
-
-    def draw_roof(self, band_amount=50):
-        window_dimensions = option.OPTION.get_window_dimensions()
-
-        hight_to_add = window_dimensions[1] / (2 * (band_amount + 1))
-        current_hight = 0
-        x = 2
-        while current_hight <= window_dimensions[1] // 2:
-            red = exp(-x/25) * 255
-            self.__canvas.create_rectangle(0, 
-                                           current_hight, 
-                                           window_dimensions[0], 
-                                           current_hight + hight_to_add, 
-                                           fill=f"#{int(red):02X}0000",
-                                           outline=f"#{int(red):02X}0000",
-                                           tags=DEFINITIVE_USE_TAG_TUPLE_0)
-            current_hight += hight_to_add
-            x *= 1.1
-
-    def draw_background(self):
-        self.draw_ground()
-        self.draw_roof()
-
-        #self.__canvas.create_rectangle(0, 0, window_dimensions[0], window_dimensions[1] // 2, fill="blue")
-        #self.__canvas.create_rectangle(0, window_dimensions[1] // 2, window_dimensions[0], window_dimensions[1], fill="gray")
 
 
         

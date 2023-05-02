@@ -47,15 +47,18 @@ class DrawerManager:
                                                    minimap_pos[1] + minimap_size)
         )
 
-        # First draw Tkinter interface
-        self.__tkinter_drawer.init_draw()
-
         # Interface OpenGL
         self.__ogl_drawer = OGLDrawer(self.__root)
         self.__ogl_drawer.pack(fill=BOTH, expand=YES)
         self.__ogl_drawer.animate = 1
         self.__ogl_drawer.after(100, self.__ogl_drawer.printContext)
-        
+
+        self.start_ia_aliens()
+
+    def run(self):
+        # First draw Tkinter interface
+        self.__tkinter_drawer.init_draw()
+
         self.__root.mainloop()
 
     def rotate_player(self, drotation:float):
@@ -72,3 +75,8 @@ class DrawerManager:
         if self.__player.can_move(dxy):
             self.__player.move(dxy)
             self.__tkinter_drawer.redraw_move(dxy)
+
+    def start_ia_aliens(self):
+        pass
+        #print("to do logic here")
+        #self.__root.after(1000, self.start_logic)

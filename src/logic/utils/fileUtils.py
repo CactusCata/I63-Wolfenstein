@@ -14,7 +14,10 @@ def read_img_data(image:Image) -> List[List[Tuple]]:
     Renvoie une liste (correspondant aux colonnes de l'image)
     de liste (correspondant à la ligne de la colonne courante)
     """
+    #print("Reading image 1...")
     brut_data = image.getdata()
+    #print(list(brut_data))
+    #print("-"*30)
     width, height = image.size
 
     data:List[List[Tuple]] = []
@@ -26,3 +29,6 @@ def read_img_data(image:Image) -> List[List[Tuple]]:
             data[col].append(brut_data[line * width + col])
 
     return data    
+
+def get_all_files_in_folder(path:str):
+    return os.listdir(path)
