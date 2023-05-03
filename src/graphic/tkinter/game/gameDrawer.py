@@ -1,5 +1,5 @@
 from tkinter import Canvas
-from math import tan, cos, sin, pi, sqrt, exp
+from math import tan, cos, sin, pi, sqrt, exp, acos, atan2
 
 from logic.game.game import Game
 from logic.world.blockType import BlockType
@@ -8,6 +8,7 @@ import logic.game.game as game
 import logic.game.option as option
 import logic.utils.mathUtils as mathUtils
 import logic.sprite.spriteManager as spriteManager
+import logic.utils.mathUtils as mathUtils
 
 
 from graphic.utils.tkUtils import ONE_USE_TAG_TUPLE, DEFINITIVE_USE_TAG_TUPLE_0
@@ -23,9 +24,8 @@ class GameDrawer:
 
     def redraw(self):
         self.draw_game()
-        
 
-    def draw_game(self):
+    def draw_walls(self):
         fov = option.OPTION.get_fov()
         player = game.GAME.get_world().get_player()
         player_rotation = player.get_rotation()
@@ -106,6 +106,32 @@ class GameDrawer:
                                         fill=current_color
                                         )
         
+
+    def draw_entities(self):
+        fov = option.OPTION.get_fov()
+        player = game.GAME.get_world().get_player()
+        player_rotation = player.get_rotation()
+        player_pos = player.get_pos()
+        screen_width = option.OPTION.get_window_dimensions()[0]
+        screen_height = option.OPTION.get_window_dimensions()[1]
+        virtual_distance = (screen_width / 2) / (tan((fov/2) * pi / 180))
+
+        aliens_pos = []
+        for alien in game.GAME.get_world().get_aliens():
+            aliens_pos.append(alien.get_pos())
+
+        visibles_aliens = self.get_visibles_entity(player_pos, 
+                                                     player_rotation * pi / 180, 
+                                                     fov)
+        
+        for visible_alien in visibles_aliens:
+            pass
+
+        
+
+    def draw_game(self):
+        self.draw_walls()
+        self.draw_entities()
 
     
     def get_luminosity_from_distance(self, distance):
@@ -189,4 +215,33 @@ class GameDrawer:
                 dih += distance_to_add_h
 
 
-        
+    def entity_is_in_fov(self, mob_pos, player_pos, player_rot, fov):
+        u = (mob_pos[0] - player_pos[0], mob_pos[1] - player_pos[1])
+        v = (cos(player_rot), sin(player_rot))
+        norme_u = mathUtils.norme_2(u)
+        prod_scal_uv = mathUtils.prod_scalaire_2(u, v)
+        angle = acos(prod_scal_uv / norme_u)
+
+        return angle * 180 / pi < fov // 2
+    
+    def is_wall_between_player_and_alien(self, player_pos:Vec2D, alien_pos:Vec2D):
+        delta_xy = alien_pos - player_pos
+
+        # Calcul de l'angle en radians
+        angle_rad = atan2(delta_xy[1], delta_xy[0])
+
+        # Conversion en degrés
+        alpha = angle_rad * 180 / pi
+        distance_to_next_wall,_ = self.get_next_wall_distance(player_pos, alpha)
+        distance_to_alien = delta_xy.distance(player_pos)
+
+        return distance_to_alien > distance_to_next_wall
+
+
+    def get_visibles_entity(self, player_pos, player_rot, fov):
+        visibles_entities = []
+        for alien in game.GAME.get_world().get_aliens():
+            if self.entity_is_in_fov(alien.get_pos(), player_pos, player_rot, fov):
+                if not self.is_wall_between_player_and_alien(player_pos, alien.get_pos()):
+                    visibles_entities.append(alien)
+        return visibles_entities

@@ -13,8 +13,8 @@ if __name__ == "__main__":
     print("Loading textures...")
     imageTkManager.load_images()
     print("Loading font...")
-    #fontManager.init_separators("../res/img/font_red.png")
-    #fontManager.load_font("../res/img/font_red.png")
+    fontManager.init_separators("../res/img/font_red.png")
+    fontManager.load_font("../res/img/font_red.png", ratio=0.8)
     print("Loading sprites...")
     spriteManager.load_images()
 
@@ -25,6 +25,6 @@ if __name__ == "__main__":
 
     print("Create window...")
     dm = DrawerManager()
-    #fontManager.load_font_tk()
+    fontManager.load_font_tk()
     imageTkManager.load_images_tk()
     dm.run()

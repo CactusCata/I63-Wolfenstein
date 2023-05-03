@@ -98,6 +98,8 @@ class TkDrawner(Canvas):
     def redraw_rot(self):
         self.clear_frame()
 
+        self.__profile.on_player_rotate()
+
         self.redraw_ground()
         self.redraw_roof()
         self.redraw_definitive_0()
@@ -110,6 +112,8 @@ class TkDrawner(Canvas):
 
     def redraw_move(self, dxy:Vec2D):
         self.clear_frame()
+
+        self.__profile.on_player_move()
 
         self.redraw_ground()
         self.redraw_roof()

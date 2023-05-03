@@ -31,4 +31,6 @@ class Vec2D:
         return str(self.vect)
     
     def distance(self, other) -> float:
-        return sqrt((other[0] - self.vect[0])**2 + (other[1] - self.vect[1])**2)
+        dx = other[0] - self.vect[0]
+        dy = other[1] - self.vect[1]
+        return sqrt(dx*dx + dy*dy)

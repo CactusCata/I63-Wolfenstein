@@ -19,13 +19,17 @@ class Profile:
         #self.__health_bar_id = -1
 
         self.__health_id_imgs = []
+        self.__pos_x_id_imgs = []
+        self.__pos_y_id_imgs = []
+        self.__rot_id_imgs = []
 
 
     def draw(self):
         self.draw_background_profile()
         self.draw_player_icon()
-        #self.draw_health_bar()
         self.draw_health_points()
+        self.draw_player_pos()
+        self.draw_player_rot()
 
     def redraw(self):
         pass
@@ -43,46 +47,61 @@ class Profile:
                           anchor=NW,
                           image=imageTkManager.NGUYEN_SAVIOR_IMG_TK,
                           tags=DEFINITIVE_USE_TAG_TUPLE_2)
-    """
-    def draw_health_bar(self):
-        start_x = self.__upleft_corner[0] + 10
-        end_x = self.__upleft_corner[0] + 90
-        start_y = self.__upleft_corner[1] + 80
-        end_y = self.__upleft_corner[1] + 100
-        self.__canvas.create_rectangle(start_x,
-                                       start_y,
-                                       end_x,
-                                       end_y,
-                                       fill="gray",
-                                       tags=DEFINITIVE_USE_TAG_TUPLE_2)
-        
-        player = game.GAME.get_world().get_player()
-        health_bar_color = color.health_to_color((player.get_health() * 50) / player.get_max_health())
-        self.__health_bar_id = self.__canvas.create_rectangle(start_x + 2,
-                                       start_y + 2,
-                                       end_x - 2,
-                                       end_y - 2,
-                                       fill=health_bar_color,
-                                       tags=DEFINITIVE_USE_TAG_TUPLE_2)
-    """
         
     def draw_health_points(self):
         player = game.GAME.get_world().get_player()
         player_health = player.get_health()
 
-        fontManager.write_text(self.__canvas, 
-                               str(player_health), 
-                               self.__upleft_corner + Vec2D(10, 10),
+        self.__health_id_imgs = fontManager.write_text(self.__canvas, 
+                               "PV: " + str(player_health), 
+                               self.__upleft_corner + Vec2D(80, 10),
+                               3)
+        
+    def draw_player_pos(self):
+        player = game.GAME.get_world().get_player()
+        player_pos = player.get_pos()
+
+        self.__pos_x_id_imgs = fontManager.write_text(self.__canvas, 
+                               f"X: {player_pos[0]:.2f}", 
+                               self.__upleft_corner + Vec2D(80, 25),
+                               3)
+        self.__pos_y_id_imgs = fontManager.write_text(self.__canvas, 
+                               f"Y: {player_pos[1]:.2f}", 
+                               self.__upleft_corner + Vec2D(80, 40),
+                               3)
+
+    def draw_player_rot(self):
+        player = game.GAME.get_world().get_player()
+        player_rot = player.get_rotation()
+
+        self.__rot_id_imgs = fontManager.write_text(self.__canvas, 
+                               f"rot: {player_rot}", 
+                               self.__upleft_corner + Vec2D(80, 55),
                                3)
         
 
+    def on_player_move(self):
+        for pos_id_img in self.__pos_x_id_imgs:
+            self.__canvas.delete(pos_id_img)
+        self.__pos_x_id_imgs.clear()
+        for pos_id_img in self.__pos_y_id_imgs:
+            self.__canvas.delete(pos_id_img)
+        self.__pos_y_id_imgs.clear()
 
-        
+        self.draw_player_pos()
+
+    def on_player_rotate(self):
+        for rot_id_img in self.__rot_id_imgs:
+            self.__canvas.delete(rot_id_img)
+        self.__rot_id_imgs.clear()
+
+        self.draw_player_rot()
+
     def on_player_get_hit(self):
-        player = game.GAME.get_world().get_player()
-        health_bar_color = color.health_to_color(player.get_health() * 100 / player.get_max_health())
+        for health_id_img in self.__health_id_imgs:
+            self.__canvas.delete(health_id_img)
+        self.__health_id_imgs.clear()
 
-
-        #self.__canvas.itemconfig(self.__health_bar_id, fill=health_bar_color)
+        self.draw_health_points()
 
    

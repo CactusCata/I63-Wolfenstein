@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-
 from logic.utils.vec2D import Vec2D
 from logic.entity.entity import Entity
 from logic.entity.entityType import EntityType

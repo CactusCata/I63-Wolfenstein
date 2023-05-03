@@ -19,9 +19,6 @@ NGUYEN_SAVIOR_IMG_TK:ImageTk = None
 NGUYEN_ZOMBIE_IMG:Image = None
 NGUYEN_ZOMBIE_IMG_TK:ImageTk = None
 
-PERCENT_IMG = None
-PERCENT_IMG_TK = None
-
 PROFILE_IMG = None
 PROFILE_IMG_TK = None
 
@@ -50,14 +47,13 @@ def load_image(path:str, resize_dims:Vec2D=None, ratio=-1) -> Image:
     return img
 
 def load_images():
-    global GUN_IMG, ROOF_IMG, GROUND_IMG, NGUYEN_SAVIOR_IMG, NGUYEN_ZOMBIE_IMG, PROFILE_IMG, PERCENT_IMG, NGUYEN_NORMAL_IMG
+    global GUN_IMG, ROOF_IMG, GROUND_IMG, NGUYEN_SAVIOR_IMG, NGUYEN_ZOMBIE_IMG, PROFILE_IMG, NGUYEN_NORMAL_IMG
 
     GUN_IMG = load_image("../res/img/gun_final.png")
     NGUYEN_ZOMBIE_IMG = load_image("../res/img/nguyen32_zombie.png")
     NGUYEN_SAVIOR_IMG = load_image("../res/img/nguyen_the_savior.png", resize_dims=Vec2D(64, 64))
     NGUYEN_NORMAL_IMG = load_image("../res/img/nguyen_normal.png", resize_dims=Vec2D(64, 64))
     PROFILE_IMG = load_image("../res/img/profile_font.png", ratio=0.25)
-    PERCENT_IMG = load_image("../res/img/percent.png", ratio=0.5)
 
     for file_path in fileUtils.get_all_files_in_folder("../res/img/numbers/"):
         number_img = load_image(f"../res/img/numbers/{file_path}", ratio=0.5)
@@ -98,7 +94,6 @@ def load_images_tk():
     NGUYEN_SAVIOR_IMG_TK = load_image_tk(NGUYEN_SAVIOR_IMG)
     NGUYEN_ZOMBIE_IMG_TK = load_image_tk(NGUYEN_ZOMBIE_IMG)
     PROFILE_IMG_TK = load_image_tk(PROFILE_IMG)
-    PERCENT_IMG_TK = load_image_tk(PERCENT_IMG)
 
     for img in NUMBERS_IMG:
         NUMBERS_IMG_TK.append(load_image_tk(img))
