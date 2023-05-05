@@ -11,6 +11,8 @@ from graphic.utils.tkUtils import DEFINITIVE_USE_TAG_0, DEFINITIVE_USE_TAG_2, DE
 
 import random
 
+from time import time
+
 class TkDrawner(Canvas):
 
     def __init__(self, master:Tk):
@@ -21,6 +23,8 @@ class TkDrawner(Canvas):
         self.__game_drawer = GameDrawer(self)
         self.__minimap = None
         self.__profile = Profile(self, Vec2D(10, 10), Vec2D(110, 120))
+        self.timestamp = time()
+        self.frame_amount = 0
 
     def init_draw(self):
         self.create_ground()
@@ -30,6 +34,7 @@ class TkDrawner(Canvas):
         self.__profile.draw()
         self.create_gun()
         self.create_gun_sight()
+        #print(len(self.find("all")))
 
     def create_ground(self):
         self.create_image(0, 
@@ -96,6 +101,13 @@ class TkDrawner(Canvas):
         self.lift(DEFINITIVE_USE_TAG_3)
 
     def redraw_rot(self):
+        timestamp = time()
+        if int(self.timestamp) != int(timestamp):
+            self.timestamp = timestamp
+            print(self.frame_amount)
+            self.frame_amount = 0
+        self.frame_amount += 1
+
         self.clear_frame()
 
         self.__profile.on_player_rotate()
@@ -108,9 +120,17 @@ class TkDrawner(Canvas):
         self.redraw_definitive_2()
         self.__minimap.redraw()
 
+        #print(len(self.find("all")))
+
         self.update_idletasks()
 
     def redraw_move(self, dxy:Vec2D):
+        timestamp = time()
+        if int(self.timestamp) != int(timestamp):
+            self.timestamp = timestamp
+            print(self.frame_amount)
+            self.frame_amount = 0
+        self.frame_amount += 1
         self.clear_frame()
 
         self.__profile.on_player_move()
@@ -123,6 +143,9 @@ class TkDrawner(Canvas):
         self.redraw_definitive_2()
         self.__minimap.update_minimap_player_move(dxy)
         self.__minimap.redraw()
+
+
+        #print(len(self.find("all")))
 
         self.update_idletasks()
 

@@ -43,7 +43,11 @@ class GameDrawer:
         # Hauteur des murs
         h = 1.0
 
+        #last_n = len(self.__canvas.find("all"))
         for col in range(screen_width):
+            #n = len(self.__canvas.find("all"))
+            #print(f"Current items amount: {n - last_n}")
+            #last_n = n
             # Angle du rayon par rapport au joueur
             angle = (col * fov) / screen_width + player_rotation - 1/2 * fov
 
@@ -56,6 +60,7 @@ class GameDrawer:
             r = h * (virtual_distance / distance)
 
             wall_column = spriteManager.FONT_IMG.get_vertical_band(percent_wall)
+            #print(f"wall col = {int(16 * percent_wall)}")
 
             # Pourcentage de luminosité en fonction de la distance
             luminosity = max(option.OPTION.get_min_luminosity(), self.get_luminosity_from_distance(distance / (0.4 * view_distance)))
@@ -85,27 +90,34 @@ class GameDrawer:
                 if current_color == wall_column_with_luminosity[current_pixel_drawing + 1]:
                     end_drawing += pixel_img_size
                 else:
-                    self.__canvas.create_line(col, 
-                                              start_drawing, 
-                                              col,
-                                              end_drawing, 
-                                              tags=ONE_USE_TAG_TUPLE,
-                                              fill=current_color
-                                              )
+                    #print(f"The color is not the same ! {current_color} != {wall_column_with_luminosity[current_pixel_drawing + 1]}")
+                    self.create_vertical_line(col, 
+                                      start_drawing, 
+                                      end_drawing,
+                                      ONE_USE_TAG_TUPLE,
+                                      current_color
+                                      )
                     current_color = wall_column_with_luminosity[current_pixel_drawing + 1]
                     start_drawing = end_drawing
                     end_drawing = start_drawing + pixel_img_size
                 current_pixel_drawing += 1
 
 
-            self.__canvas.create_line(col, 
-                                        start_drawing, 
-                                        col,
-                                        end_drawing + 2, 
-                                        tags=ONE_USE_TAG_TUPLE,
-                                        fill=current_color
-                                        )
+            self.create_vertical_line(col, 
+                                      start_drawing, 
+                                      end_drawing + 2,
+                                      ONE_USE_TAG_TUPLE,
+                                      current_color
+                                      )
         
+    def create_vertical_line(self, x, start_y, end_y, tags, color):
+        self.__canvas.create_line(x, 
+                                  start_y, 
+                                  x,
+                                  end_y, 
+                                  tags=tags,
+                                  fill=color
+                                  )
 
     def draw_entities(self):
         fov = option.OPTION.get_fov()
@@ -214,7 +226,6 @@ class GameDrawer:
                 ihy += to_add_hy
                 dih += distance_to_add_h
 
-
     def entity_is_in_fov(self, mob_pos, player_pos, player_rot, fov):
         u = (mob_pos[0] - player_pos[0], mob_pos[1] - player_pos[1])
         v = (cos(player_rot), sin(player_rot))
@@ -222,7 +233,7 @@ class GameDrawer:
         prod_scal_uv = mathUtils.prod_scalaire_2(u, v)
         angle = acos(prod_scal_uv / norme_u)
 
-        return angle * 180 / pi < fov // 2
+        return angle * 180 / pi < fov // 2, angle
     
     def is_wall_between_player_and_alien(self, player_pos:Vec2D, alien_pos:Vec2D):
         delta_xy = alien_pos - player_pos
