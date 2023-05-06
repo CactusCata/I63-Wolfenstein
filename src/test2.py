@@ -1,35 +1,51 @@
-from math import pi, cos, acos, sin, sqrt
+from tkinter import Tk, Label, Canvas
+import numpy as np
+from PIL import ImageTk, Image
+from random import randint
 
-def prod_scalaire_2(u, v):
-    return u[0] * v[0] + u[1] * v[1]
+window_width = 809
+window_height = 500
 
-def norme_2(vec):
-    return sqrt(prod_scalaire_2(vec, vec))
+img_tk = None
 
-def entity_is_visible(mob_pos, player_pos, player_rot, fov):
-    u = (mob_pos[0] - player_pos[0], mob_pos[1] - player_pos[1])
-    v = (cos(player_rot), sin(player_rot))
-    norme_u = norme_2(u)
-    prod_scal_uv = prod_scalaire_2(u, v)
-    angle = acos(prod_scal_uv / norme_u)
+def draw_np_array(label:Label, np_array):
+    global img_tk
+    img_pil = Image.fromarray(np_array)
+    img_tk = ImageTk.PhotoImage(img_pil)
+    label["image"] = img_tk
 
-    return angle * 180 / pi < fov // 2
+def draw_random(root:Tk, label:Label, np_array):
+    color = (randint(0, 255), randint(0, 255), randint(0, 255))
+    for i in range(window_height):
+            np_array[i,5] = color
 
-def get_visibles_entity(mobs_pos, player_pos, player_rot, fov):
-    visibles_entities = []
-    for mob_pos in mobs_pos:
-        if entity_is_visible(mob_pos, player_pos, player_rot, fov):
-            visibles_entities.append(mob_pos)
-    return visibles_entities
+    draw_np_array(label, np_array)
+    root.after(1, lambda: draw_random(root, label, np_array))
 
 
 if __name__ == "__main__":
-    mobs_pos = [(0.5, 1), (3, 4), (1, 3), (1.5, 1), (4, 2.5)]
-    player_pos = (2.5, 3)
-    player_rot = 0 * pi / 180
-    fov = 60
 
-    print(get_visibles_entity(mobs_pos, player_pos, player_rot, fov))
+    root = Tk()
+    root.geometry(f"{window_width}x{window_height}")
+
+    label = Label(root)
+    label.place(x=0, y=0)
+
+    #canvas = Canvas(root)
+    #canvas.place(x=0, y=0)
+
+    np_array = np.zeros([window_height, window_width, 3], dtype=np.uint8)
+    np_array[30:50] = (255, 0, 0)
+
+    draw_random(root, label, np_array)
+    
+    
+    
+
+
+    root.mainloop()
+
+
 
 """
 algo du peintre: on dessine tout puis on dessine le sprite d'alien

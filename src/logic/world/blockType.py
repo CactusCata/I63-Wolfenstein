@@ -2,7 +2,7 @@ from enum import Enum
 from tkinter import Canvas
 from logic.utils.vec2D import Vec2D
 
-from graphic.utils.tkUtils import DEFINITIVE_USE_TAG_TUPLE_2
+from graphic.tkinter.utils.tkUtils import DEFINITIVE_USE_TAG_TUPLE_2
 
 def draw_mini_map_air(canvas:Canvas, upleft_corner:Vec2D, downright_corner:Vec2D):
     pass

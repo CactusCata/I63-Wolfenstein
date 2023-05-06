@@ -2,4 +2,4 @@
 .vs/
 
 **/__pycache__/
-
+*.prof

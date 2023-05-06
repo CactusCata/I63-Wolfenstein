@@ -99,3 +99,6 @@ class Entity:
     
     def heal(self, amount:int) -> None:
         self.health = min(self.health + amount, self.max_health)
+
+    def get_world(self) -> World:
+        return self.world

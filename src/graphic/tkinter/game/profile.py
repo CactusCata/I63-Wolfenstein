@@ -3,19 +3,18 @@ from tkinter import Canvas, NW
 from logic.utils.vec2D import Vec2D
 import logic.game.game as game
 import logic.imagetk.imageTkManager as imageTkManager
-import logic.utils.color as color
-
-from graphic.utils.tkUtils import DEFINITIVE_USE_TAG_TUPLE_2
+import logic.game.option as option
 
 import logic.font.fontManager as fontManager
 
 class Profile:
 
-    def __init__(self, canvas:Canvas, upleft_corner:Vec2D, profile_size:Vec2D):
+    def __init__(self, canvas:Canvas):
         self.__game = game.GAME
         self.__canvas = canvas
-        self.__upleft_corner = upleft_corner
-        self.__profile_size = profile_size
+        infos_dimensions = option.OPTION.get_info_dimensions()
+        self.__upleft_corner = Vec2D(0, 0)
+        self.__profile_size = infos_dimensions
         #self.__health_bar_id = -1
 
         self.__health_id_imgs = []
@@ -31,22 +30,17 @@ class Profile:
         self.draw_player_pos()
         self.draw_player_rot()
 
-    def redraw(self):
-        pass
-
     def draw_background_profile(self):
         self.__canvas.create_image(self.__upleft_corner[0],
                                    self.__upleft_corner[1],
                                    anchor=NW,
-                                   image=imageTkManager.PROFILE_IMG_TK,
-                                   tags=DEFINITIVE_USE_TAG_TUPLE_2)
+                                   image=imageTkManager.PROFILE_IMG_TK)
         
     def draw_player_icon(self):
         self.__canvas.create_image(self.__upleft_corner[0] + 5, 
                           self.__upleft_corner[0] + 5,
                           anchor=NW,
-                          image=imageTkManager.NGUYEN_SAVIOR_IMG_TK,
-                          tags=DEFINITIVE_USE_TAG_TUPLE_2)
+                          image=imageTkManager.NGUYEN_SAVIOR_IMG_TK)
         
     def draw_health_points(self):
         player = game.GAME.get_world().get_player()
@@ -80,7 +74,7 @@ class Profile:
                                3)
         
 
-    def on_player_move(self):
+    def on_player_move_event(self, dxy:Vec2D):
         for pos_id_img in self.__pos_x_id_imgs:
             self.__canvas.delete(pos_id_img)
         self.__pos_x_id_imgs.clear()
@@ -90,7 +84,7 @@ class Profile:
 
         self.draw_player_pos()
 
-    def on_player_rotate(self):
+    def on_player_rot_event(self):
         for rot_id_img in self.__rot_id_imgs:
             self.__canvas.delete(rot_id_img)
         self.__rot_id_imgs.clear()

@@ -4,7 +4,7 @@ import numpy as np
 from tkinter import Canvas, NW
 from logic.utils.vec2D import Vec2D
 from typing import List
-from graphic.utils.tkUtils import DEFINITIVE_USE_TAG_TUPLE_2
+from graphic.tkinter.utils.tkUtils import DEFINITIVE_USE_TAG_TUPLE_2
 
 letters = ["!","\"","#","$","%","&","'","(",")","*","+",",","-",
            ".","/","0","1","2","3","4","5","6","7","8","9",":",

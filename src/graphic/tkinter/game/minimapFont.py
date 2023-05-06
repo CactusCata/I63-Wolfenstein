@@ -9,18 +9,24 @@ import logic.game.option as option
 import logic.utils.mathUtils as mathUtils
 import logic.game.game as game
 
-from graphic.utils.tkUtils import ONE_USE_TAG_TUPLE, DEFINITIVE_USE_TAG_TUPLE_2
+
+TAG_OLD_BEAMS = "OLD_BEAM"
+TUPLE_TAG_OLD_BEAMS = (TAG_OLD_BEAMS,)
 
 class MinimapFont:
 
-    def __init__(self, canvas:Canvas, upleft_corner:Vec2D, downright_corner:Vec2D):
+    def __init__(self, canvas:Canvas):
         self.__game = game.GAME
         self.__canvas = canvas
-        self.__upleft_corner = upleft_corner
-        self.__downright_corner = downright_corner
+        infos_dims = option.OPTION.get_info_dimensions()
+        self.__mini_size_px = infos_dims[0]
+        
+        # Placement (px, py)
+        self.__upleft_corner = Vec2D(0, 100)
+        self.__downright_corner = self.__upleft_corner + Vec2D(self.__mini_size_px, self.__mini_size_px)
 
-        self.__to_add_x = (downright_corner[0] - upleft_corner[0]) / WORLD_DIM_X
-        self.__to_add_y = (downright_corner[1] - upleft_corner[1]) / WORLD_DIM_Y
+        self.__to_add_x = (self.__downright_corner[0] - self.__upleft_corner[0]) / WORLD_DIM_X
+        self.__to_add_y = self.__to_add_x * WORLD_DIM_Y / WORLD_DIM_X
 
         self.__player_draw_id = -1
 
@@ -34,16 +40,12 @@ class MinimapFont:
         self.draw_minimap_player()
         self.draw_beams()
 
-    def redraw(self):
-        self.draw_beams()
-
     def draw_minimap_background(self):
         self.__canvas.create_rectangle(self.__upleft_corner[0], 
                                        self.__upleft_corner[1], 
                                        self.__downright_corner[0], 
                                        self.__downright_corner[1],
-                                       fill="white",
-                                       tags=DEFINITIVE_USE_TAG_TUPLE_2
+                                       fill="white"
                                        )
 
     #####################
@@ -56,10 +58,15 @@ class MinimapFont:
                                     (player_pos[1] - 1/2 * PLAYER_SIZE_Y) * self.__to_add_y + self.__upleft_corner[1], 
                                     (player_pos[0] + 1/2 * PLAYER_SIZE_X) * self.__to_add_x + self.__upleft_corner[0], 
                                     (player_pos[1] + 1/2 * PLAYER_SIZE_Y) * self.__to_add_y + self.__upleft_corner[1], 
-                                    fill="red",
-                                    tags=DEFINITIVE_USE_TAG_TUPLE_2)
+                                    fill="red")
         
-    def update_minimap_player_move(self, dxy:Vec2D):
+    def on_player_rot_event(self):
+        self.__canvas.delete(TAG_OLD_BEAMS)
+        self.draw_beams()
+        
+    def on_player_move_event(self, dxy:Vec2D):
+        self.__canvas.delete(TAG_OLD_BEAMS)
+        self.draw_beams()
         if self.__player_draw_id == -1:
             self.draw_minimap_player()
         self.__canvas.move(self.__player_draw_id, dxy[0] * self.__to_add_x, dxy[1] * self.__to_add_y)
@@ -89,8 +96,7 @@ class MinimapFont:
             self.__canvas.create_line(self.__upleft_corner[0], 
                                            current_y,
                                            self.__downright_corner[0],
-                                           current_y,
-                                           tags=DEFINITIVE_USE_TAG_TUPLE_2)
+                                           current_y)
             current_y += self.__to_add_y
 
         current_x = self.__upleft_corner[0]
@@ -98,8 +104,7 @@ class MinimapFont:
             self.__canvas.create_line(current_x, 
                                            self.__upleft_corner[1], 
                                            current_x, 
-                                           self.__downright_corner[1],
-                                           tags=DEFINITIVE_USE_TAG_TUPLE_2)
+                                           self.__downright_corner[1])
             current_x += self.__to_add_x
 
     #################
@@ -187,4 +192,4 @@ class MinimapFont:
                                          map_space_p2[0] * self.__to_add_x + self.__upleft_corner[0],
                                          map_space_p2[1] * self.__to_add_y + self.__upleft_corner[1],
                                          fill=color,
-                                         tags=ONE_USE_TAG_TUPLE)
+                                         tags=TUPLE_TAG_OLD_BEAMS)
