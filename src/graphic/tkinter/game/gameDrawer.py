@@ -1,5 +1,5 @@
 from tkinter import Tk, Label
-from math import tan, cos, pi, exp
+from math import tan, cos, pi, exp, atan2, sin, atan
 
 from logic.utils.vec2D import Vec2D
 import logic.game.game as game
@@ -57,7 +57,7 @@ class GameDrawer:
             angle = (col * fov) / screen_width + player_rotation - 1/2 * fov
 
 
-            distance, percent_wall = world.get_next_wall_distance(player_pos, angle)
+            distance, percent_wall, hit_wall_coords = world.get_next_wall_distance(player_pos, angle)
             
             # fix the "lentille effet"
             distance = distance * cos((player_rotation - angle) * pi / 180)
@@ -103,6 +103,40 @@ class GameDrawer:
                 current_pixel_drawing += 1
 
             self.zbuffer.set_col(int(col), int(start_drawing), int(end_drawing) + 2, current_color)
+
+            """
+            # Draw ground
+            if end_drawing < screen_height:
+                
+                #print('-' * 30)
+                #print(distance)
+                alpha = atan((r//2) / virtual_distance)
+                beta = atan((screen_height//2) / virtual_distance)
+                gamma = (beta - alpha) / ((screen_height - r) // 2)
+                #print(alpha * 180 / pi, beta * 180 / pi, gamma * 180 / pi)
+                end_drawing = int(end_drawing)
+                i = 0
+                # Draw ground
+                for line in range(end_drawing, screen_height):
+                    op = tan(((pi/2) - (gamma * i + alpha))) * 0.5
+                    #print(op)
+                    ratio_distance = op / distance
+                    pos = (ratio_distance * player_pos[0] + (1 - ratio_distance) * hit_wall_coords[0],
+                           ratio_distance * player_pos[1] + (1 - ratio_distance) * hit_wall_coords[1])
+
+                    #print(f"block target is {pos}")
+                    color = spriteManager.ALIEN_IMAGE.get(pos[0] % 1, pos[1] % 1)
+                    self.zbuffer.set(col, line, color)
+                    i += 1
+
+                #if (screen_height - end_drawing > 20):
+                #    exit()
+            """
+
+
+
+            
+            
 
     def draw_entities(self):
         fov = option.OPTION.get_fov()

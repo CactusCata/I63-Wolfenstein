@@ -20,6 +20,9 @@ class Sprite:
         """
         return self.pixels[int(band_percentage_needed * self.width)]
     
+    def get(self, percent_x, percent_y):
+        return self.pixels[int(percent_y * self.width)][int(percent_x * self.height)]
+    
     def get_width(self):
         return self.width
     

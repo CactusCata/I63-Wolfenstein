@@ -20,7 +20,7 @@ DEFAULT_PLAYER_MAX_HEALTH = 100
 class Player(Entity):
 
     def __init__(self, world:World, position:Vec2D, rotation:float):
-        super().__init__(world, EntityType.PLAYER, position, rotation, Vec2D(PLAYER_SIZE_X, PLAYER_SIZE_Y), 100)
+        super().__init__(world, EntityType.PLAYER, position, 180, Vec2D(PLAYER_SIZE_X, PLAYER_SIZE_Y), 100)
 
 
     def entity_is_in_fov(self, mob_pos, fov):

@@ -22,6 +22,9 @@ class ZBuffer:
     def set_line(self, line, col_start, col_end, color):
         self.buffer[line,col_start:col_end] = color
 
+    def get(self, x, y):
+        return self.buffer[y,x]
+
     def show(self):
         img_pil = Image.fromarray(self.buffer)
         self.img_tk = ImageTk.PhotoImage(img_pil)

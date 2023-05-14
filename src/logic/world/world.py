@@ -44,7 +44,7 @@ class World:
 
         # Conversion en degrés
         alpha = angle_rad * 180 / pi
-        distance_to_next_wall,_ = self.get_next_wall_distance(pos_1, alpha)
+        distance_to_next_wall,_,_ = self.get_next_wall_distance(pos_1, alpha)
         distance_to_alien = delta_xy.distance(pos_1)
 
         return distance_to_alien > distance_to_next_wall
@@ -109,19 +109,17 @@ class World:
 
         distance_to_add_v = mathUtils.euclidian_distance(ivx, ivy, ivx + to_add_vx, ivy + to_add_vy)
         distance_to_add_h = mathUtils.euclidian_distance(ihx, ihy, ihx + to_add_hx, ihy + to_add_hy)
-
-
         
         while True:
             if div < dih: # On gère l'intersection verticale
                 if self.world_matrix[int(ivy)][int(ivx + magic_v)] == BlockType.WALL:
-                    return div, (ivy % 1)
+                    return div, (ivy % 1), (ivy, ivx + magic_v)
                 ivx += to_add_vx
                 ivy += to_add_vy
                 div += distance_to_add_v
             else: # On gère l'intersection horizontale
                 if self.world_matrix[int(ihy + magic_h)][int(ihx)] == BlockType.WALL:
-                    return dih, (ihx % 1)
+                    return dih, (ihx % 1), (ihy + magic_h, ihx)
                 ihx += to_add_hx
                 ihy += to_add_hy
                 dih += distance_to_add_h

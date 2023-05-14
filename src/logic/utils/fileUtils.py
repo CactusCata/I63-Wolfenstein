@@ -26,7 +26,7 @@ def read_img_data(image:Image) -> List[List[Tuple]]:
 
     for col in range(width):
         for line in range(height):
-            data[col].append(brut_data[line * width + col])
+            data[col].append(brut_data[line * width + col][:3])
 
     return data    
 
