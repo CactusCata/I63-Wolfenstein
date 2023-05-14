@@ -1,23 +1,31 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
-from pyopengltk import OpenGLFrame
+from __future__ import annotations
+
 import time
-from math import cos, sin, atan, pi
+from math import pi, atan
+
+from OpenGL.GL import *
+from pyopengltk import OpenGLFrame
 
 import logic.game.game as game
 
 MAP_WIDTH = 16
 MAP_HEIGHT = 16
 
-class OGLDrawer(OpenGLFrame):
 
+class OGLDrawer(OpenGLFrame):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
+
         self.player = game.GAME.get_world().get_player()
 
     def initgl(self):
-        """Initalize gl states when the frame is created"""
+        """
+        Called when frame goes onto the screen or is resized.
+
+        See: BaseOpenGLFrame#tkMap()
+             BaseOpenGLFrame#tkResize()
+        """
+
         self.start = time.time()
         self.nframes = 0
 
@@ -37,7 +45,7 @@ class OGLDrawer(OpenGLFrame):
 
         glViewport(0, 0, self.width, self.height)
         glClearColor(0.0, 0.0, 0.0, 0.0)    
-	
+
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
 
@@ -51,49 +59,50 @@ class OGLDrawer(OpenGLFrame):
 
         glMatrixMode(GL_MODELVIEW)
 
-
-
     def redraw(self):
-        """Render a single frame"""
+        """
+        Render a single frame.
+        """
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)	
-	
+
         glPushMatrix()
         
         glMaterialfv(GL_FRONT, GL_AMBIENT, (1, 1, 1, 1))
-        self.draw_flooring()
-        self.draw_ceiling()
+        OGLDrawer.draw_flooring()
+        OGLDrawer.draw_ceiling()
         
         # caméra
         glRotatef(self.player.get_rotation(), 1, 0, 0)
-        #glRotatef(yaw, 0, 1, 0)
+        # glRotatef(yaw, 0, 1, 0)
         glTranslatef(self.player.get_pos()[0], 0, self.player.get_pos()[1])
         
         glPushMatrix()
         glTranslatef(1, 0, -1)
         glColor4f(1, 1, .6, 1)
-        self.draw_wall()
+        OGLDrawer.draw_wall()
         glPopMatrix()
         
         glPushMatrix()
         glTranslatef(-1, 0, -1)
         glColor4f(1, 1, .6, 1)
-        self.draw_wall()
+        OGLDrawer.draw_wall()
         glPopMatrix()
         
         glPushMatrix()
         glTranslatef(0, 0, -2)
         glColor4f(0, 1, .6, 1)
-        self.draw_wall()
+        OGLDrawer.draw_wall()
         glPopMatrix()
         
         glPopMatrix()
-        #glutSwapBuffers()
 
         tm = time.time() - self.start
         self.nframes += 1
-        #print("fps",self.nframes / tm, end="\r" )
+        print("fps", self.nframes / tm, end="\r")
 
-    def draw_wall(self):
+    @staticmethod
+    def draw_wall():
         #
         #  v1 --- v3    y = 1
         #   |     |
@@ -134,8 +143,9 @@ class OGLDrawer(OpenGLFrame):
         glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
         glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
         glEnd()
-            
-    def draw_flooring(self):
+
+    @staticmethod
+    def draw_flooring():
         #
         #  v1 --- v2
         #   |     |
@@ -154,8 +164,9 @@ class OGLDrawer(OpenGLFrame):
         glVertex3f( width, -1, -height)  # v3
 
         glEnd()
-            
-    def draw_ceiling(self):
+
+    @staticmethod
+    def draw_ceiling():
         #
         #  v2 --- v1
         #   |     |
