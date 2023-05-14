@@ -26,8 +26,7 @@ class OGLDrawer(OpenGLFrame):
              BaseOpenGLFrame#tkResize()
         """
 
-        self.start = time.time()
-        self.nframes = 0
+        # Configuration initiale d'OpenGL
 
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_CULL_FACE)
@@ -41,7 +40,7 @@ class OGLDrawer(OpenGLFrame):
         glEnable(GL_COLOR_MATERIAL)
         glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE)
 
-        # Fin du bloc init()
+        # Matrice de projection
 
         glViewport(0, 0, self.width, self.height)
         glClearColor(0.0, 0.0, 0.0, 0.0)    
@@ -96,10 +95,6 @@ class OGLDrawer(OpenGLFrame):
         glPopMatrix()
         
         glPopMatrix()
-
-        tm = time.time() - self.start
-        self.nframes += 1
-        print("fps", self.nframes / tm, end="\r")
 
     @staticmethod
     def draw_wall():
