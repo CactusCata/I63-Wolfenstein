@@ -1,16 +1,18 @@
 from __future__ import annotations
 
-import time
 from math import pi, tan, sqrt
 
 from OpenGL.GL import *
 from pyopengltk import OpenGLFrame
 
 import logic.game.game as game
+from logic.world.blockType import BlockType
 from logic.world.world import WORLD_DIM_X, WORLD_DIM_Y
 
-MAP_WIDTH = 16
-MAP_HEIGHT = 16
+GOD_MODE = False
+"""
+Affiche une vue du dessus de la map.
+"""
 
 
 class OGLDrawer(OpenGLFrame):
@@ -30,7 +32,9 @@ class OGLDrawer(OpenGLFrame):
         # Configuration initiale d'OpenGL
 
         glEnable(GL_DEPTH_TEST)
-        glEnable(GL_CULL_FACE)
+
+        if not GOD_MODE:
+            glEnable(GL_CULL_FACE)
 
         glEnable(GL_LIGHTING)
         glShadeModel(GL_FLAT)
@@ -52,7 +56,7 @@ class OGLDrawer(OpenGLFrame):
         fov = 60 * pi/180
         z_near = .1
         z_far = sqrt((WORLD_DIM_X * WORLD_DIM_X) + (WORLD_DIM_Y * WORLD_DIM_Y))
-        
+
         r = z_near * tan(fov / 2)
         t = (3 * r) / 4
 
@@ -65,36 +69,37 @@ class OGLDrawer(OpenGLFrame):
         Render a single frame.
         """
 
+        # Remarque:
+        #   Mon +x est son -x, d'où les magouilles dans la composante x.
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)	
 
         glPushMatrix()
-        
         glMaterialfv(GL_FRONT, GL_AMBIENT, (1, 1, 1, 1))
-        OGLDrawer.draw_flooring()
-        OGLDrawer.draw_ceiling()
-        
-        # caméra
-        glRotatef(self.player.get_rotation(), 0, 1, 0)
-        # glRotatef(yaw, 0, 1, 0)
-        glTranslatef(self.player.get_pos()[0], 0, self.player.get_pos()[1])
-        
-        glPushMatrix()
-        glTranslatef(1, 0, -1)
+
+        # Caméra
+        if not GOD_MODE:
+            OGLDrawer.draw_flooring()
+            OGLDrawer.draw_ceiling()
+
+            glRotatef(180, 1, 0, 0)
+            glRotatef(-self.player.get_rotation() + 90, 0, 1, 0)
+            glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 0, -self.player.get_pos()[1])
+        else:
+            glRotatef(-90, 1, 0, 0)
+            glRotatef(self.player.get_rotation() + 90, 0, 1, 0)
+            glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 10, -self.player.get_pos()[1])
+
+        # Murs
         glColor4f(1, 1, .6, 1)
-        OGLDrawer.draw_wall()
-        glPopMatrix()
-        
-        glPushMatrix()
-        glTranslatef(-1, 0, -1)
-        glColor4f(1, 1, .6, 1)
-        OGLDrawer.draw_wall()
-        glPopMatrix()
-        
-        glPushMatrix()
-        glTranslatef(0, 0, -2)
-        glColor4f(0, 1, .6, 1)
-        OGLDrawer.draw_wall()
-        glPopMatrix()
+
+        for x in range(WORLD_DIM_X):
+            for y in range(WORLD_DIM_Y):
+                if self.player.world.world_matrix[y][x] == BlockType.WALL:
+                    glPushMatrix()
+                    glTranslatef(WORLD_DIM_X - x, 0, y)
+                    OGLDrawer.draw_wall()
+                    glPopMatrix()
         
         glPopMatrix()
 
@@ -151,8 +156,8 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = MAP_WIDTH / 2
-        height = MAP_HEIGHT / 2
+        width = WORLD_DIM_X / 2
+        height = WORLD_DIM_Y / 2
 
         glColor4f(.6, .6, .6, 1)
         glVertex3f(-width, -1, -height)  # v0
@@ -172,8 +177,8 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = MAP_WIDTH / 2
-        height = MAP_HEIGHT / 2
+        width = WORLD_DIM_X / 2
+        height = WORLD_DIM_Y / 2
 
         glColor4f(.4, .4, 1, 1)
         glVertex3f( width, 1, -height)  # v3
