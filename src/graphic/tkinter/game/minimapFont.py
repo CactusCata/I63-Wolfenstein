@@ -119,6 +119,8 @@ class MinimapFont:
 
     def draw_beam(self, alpha):
         alpha %= 360
+        if alpha % 90 == 0:
+            alpha += 1
         tan_alpha = tan(alpha * pi / 180)
         world_matrix = self.__game.get_world().world_matrix
         player_pos = self.__game.get_world().get_player().get_pos()

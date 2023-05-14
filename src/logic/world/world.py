@@ -57,10 +57,15 @@ class World:
             - Le pourcentage de mur touché
         """
         alpha %= 360
-        tan_alpha = tan(alpha * pi / 180)
         x = player_pos[0]
         y = player_pos[1]
 
+        if alpha % 90 == 0:
+            alpha += 1
+
+        tan_alpha = tan(alpha * pi / 180)
+
+        
         ivx = 0
         ivy = 0
         ihx = 0
