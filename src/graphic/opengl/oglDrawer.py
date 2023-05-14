@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import time
-from math import pi, atan
+from math import pi, tan, sqrt
 
 from OpenGL.GL import *
 from pyopengltk import OpenGLFrame
 
 import logic.game.game as game
+from logic.world.world import WORLD_DIM_X, WORLD_DIM_Y
 
 MAP_WIDTH = 16
 MAP_HEIGHT = 16
@@ -48,13 +49,14 @@ class OGLDrawer(OpenGLFrame):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
 
-        zNear = 0.1
-        zFar = 5
+        fov = 60 * pi/180
+        z_near = .1
+        z_far = sqrt((WORLD_DIM_X * WORLD_DIM_X) + (WORLD_DIM_Y * WORLD_DIM_Y))
+        
+        r = z_near * tan(fov / 2)
+        t = (3 * r) / 4
 
-        r = atan(pi / 6) * zNear
-        t = 1/zFar/4
-
-        glFrustum(-r, r, -t, t, zNear, zFar)
+        glFrustum(-r, r, -t, t, z_near, z_far)
 
         glMatrixMode(GL_MODELVIEW)
 
@@ -72,7 +74,7 @@ class OGLDrawer(OpenGLFrame):
         OGLDrawer.draw_ceiling()
         
         # caméra
-        glRotatef(self.player.get_rotation(), 1, 0, 0)
+        glRotatef(self.player.get_rotation(), 0, 1, 0)
         # glRotatef(yaw, 0, 1, 0)
         glTranslatef(self.player.get_pos()[0], 0, self.player.get_pos()[1])
         
