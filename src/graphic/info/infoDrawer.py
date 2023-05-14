@@ -10,8 +10,8 @@ class InfoDrawer(Canvas):
 
     def __init__(self, master:Tk):
         super().__init__(master=master, 
-                        width=option.OPTION.get_drawer_dimensions()[0], 
-                        height=option.OPTION.get_drawer_dimensions()[1])
+                        width=option.OPTION.get_info_dimensions()[0], 
+                        height=option.OPTION.get_info_dimensions()[1])
         super().pack(side="right")
         self.__minimap = MinimapFont(self)
         self.__profile = Profile(self)

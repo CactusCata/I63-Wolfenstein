@@ -1,8 +1,9 @@
-from tkinter import Tk, BOTH, YES, Frame, BOTTOM, TOP
+from tkinter import Tk, BOTH, YES, Frame, BOTTOM, TOP, RIGHT
 from math import cos, sin, pi
 
 import graphic.tkinter.utils.tkUtils as tkUtils
 from graphic.tkinter.tkDrawer import TkDrawner
+from graphic.info.infoDrawer import InfoDrawer
 from graphic.opengl.oglDrawer import OGLDrawer
 
 import logic.game.option as option
@@ -33,6 +34,10 @@ class DrawerManager:
         self.__root.bind('s', lambda event: self.move_player(-PLAYER_STEP_SIZE))
         self.__root.bind('q', lambda event: self.rotate_player(-3))
 
+        # Infos
+        self.info_drawer = InfoDrawer(master=self.__root)
+        self.info_drawer.pack(side=RIGHT)
+
         # Interface Tkinter
         frame_tkinter = Frame(master=self.__root)
         frame_tkinter.pack(side=TOP)
@@ -49,12 +54,14 @@ class DrawerManager:
     def run(self):
         # First draw Tkinter interface
         self.__tkinter_drawer.init_draw()
+        self.info_drawer.draw()
 
         self.__root.mainloop()
 
     def rotate_player(self, drotation:float):
         self.__player.add_rotation(drotation)
 
+        self.info_drawer.on_player_rot_event()
         self.__tkinter_drawer.on_player_rot_event()
 
     def move_player(self, step_size:int):
@@ -65,6 +72,7 @@ class DrawerManager:
 
         if self.__player.can_move(dxy):
             self.__player.move(dxy)
+            self.info_drawer.on_player_move_event(dxy)
             self.__tkinter_drawer.on_player_move_event(dxy)
 
     def start_ia_aliens(self):
