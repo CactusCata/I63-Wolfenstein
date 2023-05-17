@@ -8,9 +8,17 @@ import logic.imagetk.imageTkManager as imageTkManager
 import logic.font.fontManager as fontManager
 
 if __name__ == "__main__":
-    options = Option(window_dimensions=Vec2D(int(600 * 1.618), 300), ratio_drawer=0.8, fov=60, view_distance=10, min_luminosity=0.01)
+    height = 400
+    ratio_drawer = 0.7
+
+    width = int((4 * height) / (3 * ratio_drawer))
+
+    options = Option(window_dimensions=Vec2D(width, height), ratio_drawer=ratio_drawer, fov=60, view_distance=10, min_luminosity=0.01)
     print(f"Options: {options}")
-        
+
+    ratio = options.drawer_dimensions.x / options.drawer_dimensions.y
+    assert abs(ratio - 4/3) < 0.01
+
     print("Loading textures...")
     imageTkManager.load_images()
     print("Loading font...")
