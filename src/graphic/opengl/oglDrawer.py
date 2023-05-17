@@ -65,7 +65,7 @@ class OGLDrawer(OpenGLFrame):
         glLoadIdentity()
 
         fov = 60 * pi/180
-        z_near = .1
+        z_near = .016
         z_far = sqrt((WORLD_DIM_X * WORLD_DIM_X) + (WORLD_DIM_Y * WORLD_DIM_Y))
 
         r = z_near * tan(fov / 2)
