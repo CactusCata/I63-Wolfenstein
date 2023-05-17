@@ -4,7 +4,6 @@ from math import pi, tan, sqrt
 
 import numpy
 from OpenGL.GL import *
-from PIL import Image
 from pyopengltk import OpenGLFrame
 
 import logic.game.game as game
@@ -187,8 +186,8 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = WORLD_DIM_X / 2
-        height = WORLD_DIM_Y / 2
+        width = WORLD_DIM_X * 2
+        height = WORLD_DIM_Y * 2
 
         glColor4f(.6, .6, .6, 1)
         glVertex3f(-width, -1, -height)  # v0
@@ -208,8 +207,8 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = WORLD_DIM_X / 2
-        height = WORLD_DIM_Y / 2
+        width = WORLD_DIM_X * 2
+        height = WORLD_DIM_Y * 2
 
         glColor4f(.4, .4, 1, 1)
         glVertex3f( width, 1, -height)  # v3
