@@ -42,7 +42,12 @@ class OGLDrawer(OpenGLFrame):
         # glShadeModel(GL_FLAT)
 
         glEnable(GL_LIGHT0)
-        glLightfv(GL_LIGHT0, GL_POSITION, (0, 0, .25, 1))
+        glLightfv(GL_LIGHT0, GL_POSITION, (0, 0, 0, 1))
+
+        # 1/(kc + kl.d + kq.d²)
+        glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1)
+        glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .5)
+        glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0)
 
         # Textures
 
@@ -66,7 +71,7 @@ class OGLDrawer(OpenGLFrame):
         glLoadIdentity()
 
         fov = 60 * pi/180
-        z_near = .016
+        z_near = .5
         z_far = sqrt((WORLD_DIM_X * WORLD_DIM_X) + (WORLD_DIM_Y * WORLD_DIM_Y))
 
         r = z_near * tan(fov / 2)
@@ -89,26 +94,26 @@ class OGLDrawer(OpenGLFrame):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glPushMatrix()
+        glLightfv(GL_LIGHT0, GL_POSITION, (0, 0, 0, 1))
         glMaterialfv(GL_FRONT, GL_AMBIENT, (1, 1, 1, 1))
 
         # Caméra
         if not GOD_MODE:
-            OGLDrawer.draw_flooring()
-            OGLDrawer.draw_ceiling()
+            #OGLDrawer.draw_flooring()
+            #OGLDrawer.draw_ceiling()
 
             glRotatef(180, 1, 0, 0)
             glRotatef(-self.player.get_rotation() + 90, 0, 1, 0)
-            glLightfv(GL_LIGHT0, GL_POSITION, (WORLD_DIM_X - self.player.get_pos()[0], 0, 9.5, 1))
             glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 0, -self.player.get_pos()[1])
         else:
             glRotatef(-90, 1, 0, 0)
             glRotatef(self.player.get_rotation() + 90, 0, 1, 0)
             glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 10, -self.player.get_pos()[1])
 
+        # Murs
+
         glEnable(GL_TEXTURE_2D)
         glColor4f(1, 1, 1, 1)
-
-        # Murs
 
         for x in range(WORLD_DIM_X):
             for y in range(WORLD_DIM_Y):

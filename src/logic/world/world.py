@@ -1,26 +1,24 @@
-from typing import List, TYPE_CHECKING
 from math import atan2, pi, tan
+from typing import List
 
-from logic.world.blockType import BlockType
-from logic.utils.vec2D import Vec2D
-from logic.entity.player import Player
-from logic.entity.alien import Alien
-from logic.entity.entity import Entity
 import logic.utils.mathUtils as mathUtils
-
+from logic.entity.alien import Alien
+from logic.entity.player import Player
+from logic.utils.vec2D import Vec2D
+from logic.world.blockType import BlockType
 
 WORLD_DIM_X = 16
 WORLD_DIM_Y = 16
 
-class World:
 
+class World:
     def __init__(self, world_matrix:List[List[BlockType]]):
         self.world_matrix = world_matrix
 
         self.__aliens = []
         self.__player = None
 
-    def spawn_player(self, position:Vec2D, rotation:float) -> Player:
+    def spawn_player(self, position: Vec2D, rotation: float) -> Player:
         player = Player(world=self, position=position, rotation=rotation)
         self.__player = player
         return player
@@ -28,15 +26,16 @@ class World:
     def get_player(self) -> Player:
         return self.__player
     
-    def spawn_alien(self, position:Vec2D, rotation:float) -> Player:
+    def spawn_alien(self, position: Vec2D, rotation: float) -> Alien:
         alien = Alien(world=self, position=position, rotation=rotation)
         self.__aliens.append(alien)
 
+        return alien
+
     def get_aliens(self):
         return self.__aliens
-    
-        
-    def is_wall_between_entities(self, pos_1:Vec2D, pos_2:Vec2D):
+
+    def is_wall_between_entities(self, pos_1: Vec2D, pos_2: Vec2D):
         delta_xy = pos_2 - pos_1
 
         # Calcul de l'angle en radians
@@ -44,13 +43,12 @@ class World:
 
         # Conversion en degrés
         alpha = angle_rad * 180 / pi
-        distance_to_next_wall,_,_ = self.get_next_wall_distance(pos_1, alpha)
+        distance_to_next_wall, _, _ = self.get_next_wall_distance(pos_1, alpha)
         distance_to_alien = delta_xy.distance(pos_1)
 
         return distance_to_alien > distance_to_next_wall
 
-
-    def get_next_wall_distance(self, player_pos:Vec2D, alpha:float):
+    def get_next_wall_distance(self, player_pos: Vec2D, alpha: float):
         """
         Renvoie 
             - la distance entre le joueur et le prochain mur touché avec l'angle alpha
@@ -65,7 +63,6 @@ class World:
 
         tan_alpha = tan(alpha * pi / 180)
 
-        
         ivx = 0
         ivy = 0
         ihx = 0
@@ -116,13 +113,13 @@ class World:
         distance_to_add_h = mathUtils.euclidian_distance(ihx, ihy, ihx + to_add_hx, ihy + to_add_hy)
         
         while True:
-            if div < dih: # On gère l'intersection verticale
+            if div < dih:  # On gère l'intersection verticale
                 if self.world_matrix[int(ivy)][int(ivx + magic_v)] == BlockType.WALL:
                     return div, (ivy % 1), (ivy, ivx + magic_v)
                 ivx += to_add_vx
                 ivy += to_add_vy
                 div += distance_to_add_v
-            else: # On gère l'intersection horizontale
+            else:  # On gère l'intersection horizontale
                 if self.world_matrix[int(ihy + magic_h)][int(ihx)] == BlockType.WALL:
                     return dih, (ihx % 1), (ihy + magic_h, ihx)
                 ihx += to_add_hx
