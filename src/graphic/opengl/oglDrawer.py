@@ -37,11 +37,12 @@ class OGLDrawer(OpenGLFrame):
         if not GOD_MODE:
             glEnable(GL_CULL_FACE)
 
-        # glEnable(GL_LIGHTING)
-        glShadeModel(GL_FLAT)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_COLOR_MATERIAL)
+        # glShadeModel(GL_FLAT)
 
         glEnable(GL_LIGHT0)
-        glLightfv(GL_LIGHT0, GL_POSITION, (0, 0, 0, 1))
+        glLightfv(GL_LIGHT0, GL_POSITION, (0, 0, .25, 1))
 
         # Textures
 
@@ -73,6 +74,8 @@ class OGLDrawer(OpenGLFrame):
 
         glFrustum(-r, r, -t, t, z_near, z_far)
 
+        # gluPerspective(60, 4/3, z_near, z_far)
+
         glMatrixMode(GL_MODELVIEW)
 
     def redraw(self):
@@ -83,7 +86,7 @@ class OGLDrawer(OpenGLFrame):
         # Remarque:
         #   Mon +x est son -x, d'où les magouilles dans la composante x.
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)	
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glPushMatrix()
         glMaterialfv(GL_FRONT, GL_AMBIENT, (1, 1, 1, 1))
@@ -95,6 +98,7 @@ class OGLDrawer(OpenGLFrame):
 
             glRotatef(180, 1, 0, 0)
             glRotatef(-self.player.get_rotation() + 90, 0, 1, 0)
+            glLightfv(GL_LIGHT0, GL_POSITION, (WORLD_DIM_X - self.player.get_pos()[0], 0, 9.5, 1))
             glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 0, -self.player.get_pos()[1])
         else:
             glRotatef(-90, 1, 0, 0)
@@ -105,6 +109,7 @@ class OGLDrawer(OpenGLFrame):
         glColor4f(1, 1, 1, 1)
 
         # Murs
+
         for x in range(WORLD_DIM_X):
             for y in range(WORLD_DIM_Y):
                 if self.player.world.world_matrix[y][x] == BlockType.WALL:
@@ -186,8 +191,8 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = WORLD_DIM_X * 2
-        height = WORLD_DIM_Y * 2
+        width = WORLD_DIM_X * 3
+        height = WORLD_DIM_Y * 3
 
         glColor4f(.6, .6, .6, 1)
         glVertex3f(-width, -1, -height)  # v0
@@ -207,8 +212,8 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = WORLD_DIM_X * 2
-        height = WORLD_DIM_Y * 2
+        width = WORLD_DIM_X * 3
+        height = WORLD_DIM_Y * 3
 
         glColor4f(.4, .4, 1, 1)
         glVertex3f( width, 1, -height)  # v3
