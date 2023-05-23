@@ -35,7 +35,7 @@ class OGLDrawer(OpenGLFrame):
 
         glEnable(GL_DEPTH_TEST)
 
-        if not GOD_MODE:
+        if not GOD_MODE or True:
             glEnable(GL_CULL_FACE)
 
         glEnable(GL_LIGHTING)
@@ -78,7 +78,7 @@ class OGLDrawer(OpenGLFrame):
         glLoadIdentity()
 
         fov = 60 * pi/180
-        z_near = 1
+        z_near = .1
         z_far = sqrt((WORLD_DIM_X * WORLD_DIM_X) + (WORLD_DIM_Y * WORLD_DIM_Y))
 
         r = z_near * tan(fov / 2)
@@ -101,21 +101,18 @@ class OGLDrawer(OpenGLFrame):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glPushMatrix()
-        OGLDrawer.draw_wall()
 
         # Caméra
         if not GOD_MODE:
             #OGLDrawer.draw_flooring()
             #OGLDrawer.draw_ceiling()
 
-            glRotatef(180, 1, 0, 0)
-            glRotatef(-self.player.get_rotation() + 90, 0, 1, 0)
-            glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 0, -self.player.get_pos()[1])
-            glLightfv(GL_LIGHT0, GL_POSITION, (WORLD_DIM_X - self.player.x, 0, self.player.y, 1))
+            glRotatef(self.player.rotation + 90, 0, 1, 0)
+            glTranslatef(-(self.player.x - WORLD_DIM_X / 2), 0, -(self.player.y - WORLD_DIM_Y / 2))
         else:
             glRotatef(-90, 1, 0, 0)
-            glRotatef(self.player.get_rotation() + 90, 0, 1, 0)
-            glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 10, -self.player.get_pos()[1])
+            glRotatef(-self.player.rotation - 90, 0, 1, 0)
+            glTranslatef(-(self.player.x - WORLD_DIM_X / 2), 10, -(self.player.y - WORLD_DIM_Y / 2))
 
         # Murs
 
@@ -126,7 +123,7 @@ class OGLDrawer(OpenGLFrame):
             for y in range(WORLD_DIM_Y):
                 if self.player.world.world_matrix[y][x] == BlockType.WALL:
                     glPushMatrix()
-                    glTranslatef(WORLD_DIM_X - x, 0, y)
+                    glTranslatef(x - WORLD_DIM_X / 2, 0, y - WORLD_DIM_Y / 2)
                     OGLDrawer.draw_wall()
                     glPopMatrix()
 
