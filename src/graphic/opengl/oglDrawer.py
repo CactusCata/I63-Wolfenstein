@@ -166,8 +166,11 @@ class OGLDrawer(OpenGLFrame):
 
         glDisable(GL_BLEND)
 
+        # Mesure du temps
         glFinish()
         elapsed = time.process_time_ns() - start
+
+        # exponentially weighted moving average
         alpha = .9
         beta = 1 - alpha
 
@@ -323,7 +326,7 @@ def draw_weapon():
     width_px = 166
     height_px = 127
 
-    width = .25
+    width = .333
     height = -(width * height_px) / width_px
 
     glBegin(GL_QUADS)
