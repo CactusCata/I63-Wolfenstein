@@ -56,25 +56,8 @@ class OGLDrawer(OpenGLFrame):
 
         # Textures
 
-        _bytes3 = numpy.array(Image.open("../res/img/netherrack.png").getdata(), numpy.uint8)
-
-        glBindTexture(GL_TEXTURE_2D, TEX_NETHERRACK)
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 16, 16, 0, GL_RGBA, GL_UNSIGNED_BYTE, _bytes3)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
-        _bytes2 = numpy.array(Image.open("../res/img/ahmed.png").getdata(), numpy.uint8)
-
-        glBindTexture(GL_TEXTURE_2D, TEX_AHMED)
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 128, 128, 0, GL_RGBA, GL_UNSIGNED_BYTE, _bytes2)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-
-        print("GL_ERROR:", glGetError())
+        load_tex(TEX_AHMED, "ahmed.png", 128)
+        load_tex(TEX_NETHERRACK, "netherrack.png", 16)
 
         # Matériaux
         glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
@@ -123,13 +106,14 @@ class OGLDrawer(OpenGLFrame):
             glRotatef(-self.player.rotation - 90, 0, 1, 0)
             glTranslatef(-(self.player.x - WORLD_DIM_X / 2), 10, -(self.player.y - WORLD_DIM_Y / 2))
 
+        # Lumière
         glLightfv(GL_LIGHT0, GL_POSITION, (self.player.x - WORLD_DIM_X / 2, 0, self.player.y - WORLD_DIM_Y / 2, 1))
 
         # Sol & plafond
         glBindTexture(GL_TEXTURE_2D, TEX_NETHERRACK)
         glMaterialfv(GL_FRONT, GL_AMBIENT, (1, 1, 1, 1))
-        OGLDrawer.draw_flooring()
-        OGLDrawer.draw_ceiling()
+        draw_flooring()
+        draw_ceiling()
 
         # Murs
 
@@ -142,120 +126,138 @@ class OGLDrawer(OpenGLFrame):
                 if self.player.world.world_matrix[y][x] == BlockType.WALL:
                     glPushMatrix()
                     glTranslatef(x - WORLD_DIM_X / 2, 0, y - WORLD_DIM_Y / 2)
-                    OGLDrawer.draw_wall()
+                    draw_wall()
                     glPopMatrix()
         
         glPopMatrix()
 
-    @staticmethod
-    def draw_wall():
-        #
-        #  v1 --- v3    y = 1
-        #   |     |
-        #   |     |
-        #  v0 --- v2    y = 0
-        #
-        #  x +/- 0.5
-        #
-        #
-        #     * --- *
-        #    /|    /|
-        #   / |   / |
-        #  * --- *  *
-        #  |     | /
-        #  |     |/
-        #  * --- *
-        #
-        #  pas de plafond ni de sol
-        #
 
-        glBegin(GL_QUAD_STRIP)
+def load_tex(id, filename, size):
+    """
+    Charge une texture.
 
-        # face arrière
-        glTexCoord2f(1, 1)
-        glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
+    :param id: le nom de la texture, cf. `glGenTextures()`.
+    :param filename: le nom du fichier
+    :param size: la longueur du côté de l'image
+    """
 
-        glTexCoord2f(1, 0)
-        glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
+    _bytes = numpy.array(Image.open(f"../res/img/{filename}").getdata(), numpy.uint8)
 
-        glTexCoord2f(0, 1)
-        glVertex3f( .5, -.5, -.5)  # v2 (arrière)
+    glBindTexture(GL_TEXTURE_2D, id)
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, size, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, _bytes)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-        glTexCoord2f(0, 0)
-        glVertex3f( .5,  .5, -.5)  # v3 (arrière)
 
-        # face droite
-        glTexCoord2f(1, 1)
-        glVertex3f( .5, -.5,  .5)  # v2 (avant)
+def draw_wall():
+    #
+    #  v1 --- v3    y = 1
+    #   |     |
+    #   |     |
+    #  v0 --- v2    y = 0
+    #
+    #  x +/- 0.5
+    #
+    #
+    #     * --- *
+    #    /|    /|
+    #   / |   / |
+    #  * --- *  *
+    #  |     | /
+    #  |     |/
+    #  * --- *
+    #
+    #  pas de plafond ni de sol
+    #
 
-        glTexCoord2f(1, 0)
-        glVertex3f( .5,  .5,  .5)  # v3 (avant)
+    glBegin(GL_QUAD_STRIP)
 
-        # face avant
-        glTexCoord2f(0, 1)
-        glVertex3f(-.5, -.5,  .5)  # v0 (avant)
+    # face arrière
+    glTexCoord2f(1, 1)
+    glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
 
-        glTexCoord2f(0, 0)
-        glVertex3f(-.5,  .5,  .5)  # v1 (avant)
+    glTexCoord2f(1, 0)
+    glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
 
-        # face gauche
-        glTexCoord2f(1, 1)
-        glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
+    glTexCoord2f(0, 1)
+    glVertex3f( .5, -.5, -.5)  # v2 (arrière)
 
-        glTexCoord2f(1, 0)
-        glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
-        glEnd()
+    glTexCoord2f(0, 0)
+    glVertex3f( .5,  .5, -.5)  # v3 (arrière)
 
-    @staticmethod
-    def draw_flooring():
-        #
-        #  v1 --- v2
-        #   |     |
-        #  v0 --- v3
-        #
+    # face droite
+    glTexCoord2f(1, 1)
+    glVertex3f( .5, -.5,  .5)  # v2 (avant)
 
-        glBegin(GL_QUADS)
+    glTexCoord2f(1, 0)
+    glVertex3f( .5,  .5,  .5)  # v3 (avant)
 
-        width = WORLD_DIM_X / 2 + .5
-        height = WORLD_DIM_Y / 2 + .5
+    # face avant
+    glTexCoord2f(0, 1)
+    glVertex3f(-.5, -.5,  .5)  # v0 (avant)
 
-        glTexCoord2f(WORLD_DIM_X, 0)
-        glVertex3f(-width, -.5, -height)  # v0
+    glTexCoord2f(0, 0)
+    glVertex3f(-.5,  .5,  .5)  # v1 (avant)
 
-        glTexCoord2f(0, 0)
-        glVertex3f(-width, -.5,  height)  # v1
+    # face gauche
+    glTexCoord2f(1, 1)
+    glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
 
-        glTexCoord2f(0, WORLD_DIM_Y)
-        glVertex3f( width, -.5,  height)  # v2
+    glTexCoord2f(1, 0)
+    glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
+    glEnd()
 
-        glTexCoord2f(WORLD_DIM_X, WORLD_DIM_Y)
-        glVertex3f( width, -.5, -height)  # v3
 
-        glEnd()
+def draw_flooring():
+    #
+    #  v1 --- v2
+    #   |     |
+    #  v0 --- v3
+    #
 
-    @staticmethod
-    def draw_ceiling():
-        #
-        #  v2 --- v1
-        #   |     |
-        #  v3 --- v0
-        #
+    glBegin(GL_QUADS)
 
-        glBegin(GL_QUADS)
+    width = WORLD_DIM_X / 2 + .5
+    height = WORLD_DIM_Y / 2 + .5
 
-        width = WORLD_DIM_X / 2 + .5
-        height = WORLD_DIM_Y / 2 + .5
+    glTexCoord2f(WORLD_DIM_X, 0)
+    glVertex3f(-width, -.5, -height)  # v0
 
-        glTexCoord2f(WORLD_DIM_X, WORLD_DIM_Y)
-        glVertex3f( width, .5, -height)  # v3
+    glTexCoord2f(0, 0)
+    glVertex3f(-width, -.5,  height)  # v1
 
-        glTexCoord2f(0, WORLD_DIM_Y)
-        glVertex3f( width, .5,  height)  # v2
+    glTexCoord2f(0, WORLD_DIM_Y)
+    glVertex3f( width, -.5,  height)  # v2
 
-        glTexCoord2f(0, 0)
-        glVertex3f(-width, .5,  height)  # v1
+    glTexCoord2f(WORLD_DIM_X, WORLD_DIM_Y)
+    glVertex3f( width, -.5, -height)  # v3
 
-        glTexCoord2f(WORLD_DIM_X, 0)
-        glVertex3f(-width, .5, -height)  # v0
+    glEnd()
 
-        glEnd()
+
+def draw_ceiling():
+    #
+    #  v2 --- v1
+    #   |     |
+    #  v3 --- v0
+    #
+
+    glBegin(GL_QUADS)
+
+    width = WORLD_DIM_X / 2 + .5
+    height = WORLD_DIM_Y / 2 + .5
+
+    glTexCoord2f(WORLD_DIM_X, WORLD_DIM_Y)
+    glVertex3f( width, .5, -height)  # v3
+
+    glTexCoord2f(0, WORLD_DIM_Y)
+    glVertex3f( width, .5,  height)  # v2
+
+    glTexCoord2f(0, 0)
+    glVertex3f(-width, .5,  height)  # v1
+
+    glTexCoord2f(WORLD_DIM_X, 0)
+    glVertex3f(-width, .5, -height)  # v0
+
+    glEnd()
