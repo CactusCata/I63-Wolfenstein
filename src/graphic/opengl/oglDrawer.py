@@ -18,6 +18,7 @@ Affiche une vue du dessus de la map.
 
 TEX_AHMED = 1
 TEX_NETHERRACK = 2
+TEX_WEAPON = 3
 
 
 class OGLDrawer(OpenGLFrame):
@@ -37,8 +38,8 @@ class OGLDrawer(OpenGLFrame):
         # Configuration initiale d'OpenGL
 
         glEnable(GL_DEPTH_TEST)
-
-        if not GOD_MODE or True:
+        
+        if not GOD_MODE:
             glEnable(GL_CULL_FACE)
 
         glEnable(GL_LIGHTING)
@@ -56,8 +57,9 @@ class OGLDrawer(OpenGLFrame):
 
         # Textures
 
-        load_tex(TEX_AHMED, "ahmed.png", 128)
-        load_tex(TEX_NETHERRACK, "netherrack.png", 16)
+        load_tex(TEX_AHMED, "ahmed.png", 128, 128)
+        load_tex(TEX_NETHERRACK, "netherrack.png", 16, 16)
+        load_tex(TEX_WEAPON, "gun_final.png", 166, 127)
 
         # Matériaux
         glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
@@ -116,7 +118,6 @@ class OGLDrawer(OpenGLFrame):
         draw_ceiling()
 
         # Murs
-
         glBindTexture(GL_TEXTURE_2D, TEX_AHMED)
         glMaterialfv(GL_FRONT, GL_AMBIENT, (.5, .5, .5, 1))
         glColor4f(1, 1, 1, 1)
@@ -128,24 +129,53 @@ class OGLDrawer(OpenGLFrame):
                     glTranslatef(x - WORLD_DIM_X / 2, 0, y - WORLD_DIM_Y / 2)
                     draw_wall()
                     glPopMatrix()
-        
+
+        # Début HUD
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+        glDisable(GL_LIGHTING)
+        glDisable(GL_DEPTH_TEST)
+
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        # Arme de poing
+        glBindTexture(GL_TEXTURE_2D, TEX_WEAPON)
+        draw_weapon()
+
+        # Fin HUD
+        glMatrixMode(GL_PROJECTION)
         glPopMatrix()
 
+        glMatrixMode(GL_MODELVIEW)
+        glPopMatrix()
 
-def load_tex(id, filename, size):
+        glEnable(GL_LIGHTING)
+        glEnable(GL_DEPTH_TEST)
+
+        glDisable(GL_BLEND)
+
+
+def load_tex(id, filename, width, height):
     """
     Charge une texture.
 
     :param id: le nom de la texture, cf. `glGenTextures()`.
     :param filename: le nom du fichier
-    :param size: la longueur du côté de l'image
+    :param width: largueur de l'image
+    :param height: hauteur de l'image
     """
 
     _bytes = numpy.array(Image.open(f"../res/img/{filename}").getdata(), numpy.uint8)
 
     glBindTexture(GL_TEXTURE_2D, id)
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, size, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, _bytes)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _bytes)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
@@ -259,5 +289,37 @@ def draw_ceiling():
 
     glTexCoord2f(WORLD_DIM_X, 0)
     glVertex3f(-width, .5, -height)  # v0
+
+    glEnd()
+
+
+def draw_weapon():
+    #
+    #  #---------------#
+    #  |               |
+    #  |   v3 --- v2   |
+    #  |    |     |    |
+    #  #---v0 --- v1---#
+    #
+
+    width_px = 166
+    height_px = 127
+
+    width = .25
+    height = -(width * height_px) / width_px
+
+    glBegin(GL_QUADS)
+
+    glTexCoord2f(0, 1)
+    glVertex3f(-width, -1, 0)  # v0
+
+    glTexCoord2f(1, 1)
+    glVertex3f( width, -1, 0)  # v1
+
+    glTexCoord2f(1, 0)
+    glVertex3f( width, height, 0)  # v2
+
+    glTexCoord2f(0, 0)
+    glVertex3f(-width, height, 0)  # v3
 
     glEnd()
