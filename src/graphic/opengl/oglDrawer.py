@@ -4,6 +4,7 @@ from math import pi, tan, sqrt
 
 import numpy
 from OpenGL.GL import *
+from PIL import Image
 from pyopengltk import OpenGLFrame
 
 import logic.game.game as game
@@ -15,13 +16,15 @@ GOD_MODE = False
 Affiche une vue du dessus de la map.
 """
 
+TEX_AHMED = 1
+TEX_NETHERRACK = 2
+
 
 class OGLDrawer(OpenGLFrame):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
 
         self.player = game.GAME.get_world().get_player()
-        self._d = 0
 
     def initgl(self):
         """
@@ -39,33 +42,42 @@ class OGLDrawer(OpenGLFrame):
             glEnable(GL_CULL_FACE)
 
         glEnable(GL_LIGHTING)
-        # glEnable(GL_COLOR_MATERIAL)
-        # glShadeModel(GL_FLAT)
+        glShadeModel(GL_SMOOTH)
 
         glEnable(GL_LIGHT0)
-        glLightfv(GL_LIGHT0, GL_AMBIENT, (.5, .5, .5, 1))
+        glLightfv(GL_LIGHT0, GL_AMBIENT, (1, 1, 1, 1))
 
         # 1/(kc + kl.d + kq.d²)
         glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1)
-        glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .1)
-        glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0)
+        glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0)
+        glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, .01)
+
+        glEnable(GL_TEXTURE_2D)
 
         # Textures
 
-        _bytes = numpy.load("../res/img/img.png.baked", allow_pickle=True)
+        _bytes3 = numpy.array(Image.open("../res/img/netherrack.png").getdata(), numpy.uint8)
 
-        glBindTexture(GL_TEXTURE_2D, 1)
+        glBindTexture(GL_TEXTURE_2D, TEX_NETHERRACK)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2048, 2048, 0, GL_RGB, GL_UNSIGNED_BYTE, _bytes)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 16, 16, 0, GL_RGBA, GL_UNSIGNED_BYTE, _bytes3)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glGenerateMipmap(GL_TEXTURE_2D)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+
+        _bytes2 = numpy.array(Image.open("../res/img/ahmed.png").getdata(), numpy.uint8)
+
+        glBindTexture(GL_TEXTURE_2D, TEX_AHMED)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 128, 128, 0, GL_RGBA, GL_UNSIGNED_BYTE, _bytes2)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
 
         print("GL_ERROR:", glGetError())
 
         # Matériaux
         glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
-        glMaterialfv(GL_FRONT, GL_AMBIENT, (.5, .5, .5, 1))
         glMaterialfv(GL_FRONT, GL_SPECULAR, (1, 1, 1, 1))
         glMaterialf(GL_FRONT, GL_SHININESS, 0)
 
@@ -104,9 +116,6 @@ class OGLDrawer(OpenGLFrame):
 
         # Caméra
         if not GOD_MODE:
-            #OGLDrawer.draw_flooring()
-            #OGLDrawer.draw_ceiling()
-
             glRotatef(self.player.rotation + 90, 0, 1, 0)
             glTranslatef(-(self.player.x - WORLD_DIM_X / 2), 0, -(self.player.y - WORLD_DIM_Y / 2))
         else:
@@ -114,9 +123,18 @@ class OGLDrawer(OpenGLFrame):
             glRotatef(-self.player.rotation - 90, 0, 1, 0)
             glTranslatef(-(self.player.x - WORLD_DIM_X / 2), 10, -(self.player.y - WORLD_DIM_Y / 2))
 
+        glLightfv(GL_LIGHT0, GL_POSITION, (self.player.x - WORLD_DIM_X / 2, 0, self.player.y - WORLD_DIM_Y / 2, 1))
+
+        # Sol & plafond
+        glBindTexture(GL_TEXTURE_2D, TEX_NETHERRACK)
+        glMaterialfv(GL_FRONT, GL_AMBIENT, (1, 1, 1, 1))
+        OGLDrawer.draw_flooring()
+        OGLDrawer.draw_ceiling()
+
         # Murs
 
-        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, TEX_AHMED)
+        glMaterialfv(GL_FRONT, GL_AMBIENT, (.5, .5, .5, 1))
         glColor4f(1, 1, 1, 1)
 
         for x in range(WORLD_DIM_X):
@@ -126,8 +144,6 @@ class OGLDrawer(OpenGLFrame):
                     glTranslatef(x - WORLD_DIM_X / 2, 0, y - WORLD_DIM_Y / 2)
                     OGLDrawer.draw_wall()
                     glPopMatrix()
-
-        glDisable(GL_TEXTURE_2D)
         
         glPopMatrix()
 
@@ -200,14 +216,20 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = WORLD_DIM_X * 3
-        height = WORLD_DIM_Y * 3
+        width = WORLD_DIM_X / 2 + .5
+        height = WORLD_DIM_Y / 2 + .5
 
-        glColor4f(.6, .6, .6, 1)
-        glVertex3f(-width, -1, -height)  # v0
-        glVertex3f(-width, -1,  height)  # v1
-        glVertex3f( width, -1,  height)  # v2
-        glVertex3f( width, -1, -height)  # v3
+        glTexCoord2f(WORLD_DIM_X, 0)
+        glVertex3f(-width, -.5, -height)  # v0
+
+        glTexCoord2f(0, 0)
+        glVertex3f(-width, -.5,  height)  # v1
+
+        glTexCoord2f(0, WORLD_DIM_Y)
+        glVertex3f( width, -.5,  height)  # v2
+
+        glTexCoord2f(WORLD_DIM_X, WORLD_DIM_Y)
+        glVertex3f( width, -.5, -height)  # v3
 
         glEnd()
 
@@ -221,13 +243,19 @@ class OGLDrawer(OpenGLFrame):
 
         glBegin(GL_QUADS)
 
-        width = WORLD_DIM_X * 3
-        height = WORLD_DIM_Y * 3
+        width = WORLD_DIM_X / 2 + .5
+        height = WORLD_DIM_Y / 2 + .5
 
-        glColor4f(.4, .4, 1, 1)
-        glVertex3f( width, 1, -height)  # v3
-        glVertex3f( width, 1,  height)  # v2
-        glVertex3f(-width, 1,  height)  # v1
-        glVertex3f(-width, 1, -height)  # v0
+        glTexCoord2f(WORLD_DIM_X, WORLD_DIM_Y)
+        glVertex3f( width, .5, -height)  # v3
+
+        glTexCoord2f(0, WORLD_DIM_Y)
+        glVertex3f( width, .5,  height)  # v2
+
+        glTexCoord2f(0, 0)
+        glVertex3f(-width, .5,  height)  # v1
+
+        glTexCoord2f(WORLD_DIM_X, 0)
+        glVertex3f(-width, .5, -height)  # v0
 
         glEnd()
