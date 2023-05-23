@@ -22,6 +22,9 @@ class Profile:
         self.__pos_y_id_imgs = []
         self.__rot_id_imgs = []
 
+        self.__player_icon_id = -1
+        self.__player_current_img = None
+
 
     def draw(self):
         self.draw_background_profile()
@@ -40,17 +43,22 @@ class Profile:
         player = game.GAME.get_world().get_player()
         player_health_percent = player.get_health() / player.get_max_health()
         img = None
-        if player_health_percent < 0.1:
+        if player_health_percent < 0.1 and self.__player_current_img != imageTkManager.NGUYEN_ZOMBIE_IMG_TK:
             img = imageTkManager.NGUYEN_ZOMBIE_IMG_TK
-        elif player_health_percent < 0.6:
+            self.__player_current_img = imageTkManager.NGUYEN_ZOMBIE_IMG_TK
+        elif player_health_percent < 0.6 and self.__player_current_img != imageTkManager.NGUYEN_NORMAL_IMG_TK:
             img = imageTkManager.NGUYEN_NORMAL_IMG_TK
-        else:
+            self.__player_current_img = imageTkManager.NGUYEN_NORMAL_IMG_TK
+        elif self.__player_current_img != imageTkManager.NGUYEN_SAVIOR_IMG_TK:
             img = imageTkManager.NGUYEN_SAVIOR_IMG_TK
+            self.__player_current_img = imageTkManager.NGUYEN_SAVIOR_IMG_TK
         
-        self.__canvas.create_image(self.__upleft_corner[0] + 5, 
-                          self.__upleft_corner[0] + 5,
-                          anchor=NW,
-                          image=img)
+        if img is not None:
+            self.__canvas.delete(self.__player_icon_id)
+            self.__player_icon_id = self.__canvas.create_image(self.__upleft_corner[0] + 5, 
+                            self.__upleft_corner[0] + 5,
+                            anchor=NW,
+                            image=img)
         
     def draw_health_points(self):
         player = game.GAME.get_world().get_player()
