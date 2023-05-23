@@ -16,7 +16,7 @@ GOD_MODE = False
 Affiche une vue du dessus de la map.
 """
 
-TEX_AHMED = 1
+TEX_WALL = 1
 TEX_NETHERRACK = 2
 TEX_WEAPON = 3
 
@@ -57,7 +57,7 @@ class OGLDrawer(OpenGLFrame):
 
         # Textures
 
-        load_tex(TEX_AHMED, "ahmed.png", 128, 128)
+        load_tex(TEX_WALL, "img.png", 16, 16)
         load_tex(TEX_NETHERRACK, "netherrack.png", 16, 16)
         load_tex(TEX_WEAPON, "gun_final.png", 166, 127)
 
@@ -118,7 +118,7 @@ class OGLDrawer(OpenGLFrame):
         draw_ceiling()
 
         # Murs
-        glBindTexture(GL_TEXTURE_2D, TEX_AHMED)
+        glBindTexture(GL_TEXTURE_2D, TEX_WALL)
         glMaterialfv(GL_FRONT, GL_AMBIENT, (.5, .5, .5, 1))
         glColor4f(1, 1, 1, 1)
 
