@@ -156,37 +156,37 @@ class OGLDrawer(OpenGLFrame):
         glBegin(GL_QUAD_STRIP)
 
         # face arrière
-        glTexCoord2f(1, 0)
+        glTexCoord2f(1, 1)
         glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
 
-        glTexCoord2f(1, 1)
+        glTexCoord2f(1, 0)
         glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
 
-        glTexCoord2f(0, 0)
+        glTexCoord2f(0, 1)
         glVertex3f( .5, -.5, -.5)  # v2 (arrière)
 
-        glTexCoord2f(0, 1)
+        glTexCoord2f(0, 0)
         glVertex3f( .5,  .5, -.5)  # v3 (arrière)
 
         # face droite
-        glTexCoord2f(1, 0)
+        glTexCoord2f(1, 1)
         glVertex3f( .5, -.5,  .5)  # v2 (avant)
 
-        glTexCoord2f(1, 1)
+        glTexCoord2f(1, 0)
         glVertex3f( .5,  .5,  .5)  # v3 (avant)
 
         # face avant
-        glTexCoord2f(0, 0)
+        glTexCoord2f(0, 1)
         glVertex3f(-.5, -.5,  .5)  # v0 (avant)
 
-        glTexCoord2f(0, 1)
+        glTexCoord2f(0, 0)
         glVertex3f(-.5,  .5,  .5)  # v1 (avant)
 
         # face gauche
-        glTexCoord2f(1, 0)
+        glTexCoord2f(1, 1)
         glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
 
-        glTexCoord2f(1, 1)
+        glTexCoord2f(1, 0)
         glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
         glEnd()
 
