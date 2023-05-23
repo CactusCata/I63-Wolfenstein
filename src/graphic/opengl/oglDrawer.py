@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from math import pi, tan, sqrt
 
 import numpy
@@ -26,6 +27,9 @@ class OGLDrawer(OpenGLFrame):
         super().__init__(*args, **kw)
 
         self.player = game.GAME.get_world().get_player()
+
+        self.average_time_ns = int(1e9 / 60)
+        self.last_echo = time.process_time() + .5  # pour alterner les messages avec Tk
 
     def initgl(self):
         """
@@ -95,6 +99,8 @@ class OGLDrawer(OpenGLFrame):
         # Remarque:
         #   Mon +x est son -x, d'où les magouilles dans la composante x.
 
+        start = time.process_time_ns()
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glPushMatrix()
@@ -159,6 +165,18 @@ class OGLDrawer(OpenGLFrame):
         glEnable(GL_DEPTH_TEST)
 
         glDisable(GL_BLEND)
+
+        glFinish()
+        elapsed = time.process_time_ns() - start
+        alpha = .9
+        beta = 1 - alpha
+
+        self.average_time_ns = int(alpha * self.average_time_ns + beta * elapsed)
+
+        now = time.process_time()
+        if (self.last_echo + 1) <= now:
+            print("Gl fps:", int(1e9 / self.average_time_ns))
+            self.last_echo = now
 
 
 def load_tex(id, filename, width, height):
