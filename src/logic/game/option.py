@@ -10,7 +10,7 @@ class Option:
         OPTION = self
         self.window_dimensions = window_dimensions
         self.drawer_dimensions = Vec2D(int(window_dimensions[0] * ratio_drawer), window_dimensions[1])
-        self.infos_dimensions = Vec2D(int(window_dimensions[0] * (1 - ratio_drawer)), window_dimensions[1])
+        self.infos_dimensions = Vec2D(int(window_dimensions[0] * (1 - ratio_drawer)), window_dimensions[1] * 2)
         self.fov = fov
         self.view_distance = view_distance
         self.min_luminosity = min_luminosity

@@ -9,6 +9,7 @@ from logic.utils.vec2D import Vec2D
 
 GUN_IMG:Image = None
 GUN_IMG_TK:ImageTk = None
+GUN_IMG_NP = None
 
 NGUYEN_NORMAL_IMG:Image = None
 NGUYEN_NORMAL_IMG_TK:ImageTk = None
@@ -21,6 +22,9 @@ NGUYEN_ZOMBIE_IMG_TK:ImageTk = None
 
 PROFILE_IMG = None
 PROFILE_IMG_TK = None
+
+PROFIL_FONT_IMG = None
+PROFIL_FONT_IMG_TK = None
 
 ROOF_IMG:List = []
 ROOF_IMG_TK:List = []
@@ -47,13 +51,15 @@ def load_image(path:str, resize_dims:Vec2D=None, ratio=-1) -> Image:
     return img
 
 def load_images():
-    global GUN_IMG, ROOF_IMG, GROUND_IMG, NGUYEN_SAVIOR_IMG, NGUYEN_ZOMBIE_IMG, PROFILE_IMG, NGUYEN_NORMAL_IMG
+    global GUN_IMG, ROOF_IMG, GROUND_IMG, NGUYEN_SAVIOR_IMG, NGUYEN_ZOMBIE_IMG, PROFILE_IMG, NGUYEN_NORMAL_IMG, PROFIL_FONT_IMG
 
     GUN_IMG = load_image("../res/img/gun_final.png")
     NGUYEN_ZOMBIE_IMG = load_image("../res/img/nguyen32_zombie.png")
     NGUYEN_SAVIOR_IMG = load_image("../res/img/nguyen_the_savior.png", resize_dims=Vec2D(64, 64))
     NGUYEN_NORMAL_IMG = load_image("../res/img/nguyen_normal.png", resize_dims=Vec2D(64, 64))
     PROFILE_IMG = load_image("../res/img/profile_font.png", ratio=0.25)
+    PROFIL_FONT_IMG = load_image("../res/img/profil_font.png", resize_dims=Vec2D(
+        option.OPTION.get_drawer_dimensions()[0], option.OPTION.get_info_dimensions()[1]))
 
     for file_path in fileUtils.get_all_files_in_folder("../res/img/numbers/"):
         number_img = load_image(f"../res/img/numbers/{file_path}", ratio=0.5)
@@ -83,17 +89,18 @@ def load_images():
 #####################
 def load_image_tk(image:Image) -> ImageTk:
     image_tk = ImageTk.PhotoImage(image)
-    image.close()
+    #image.close()
     return image_tk
 
 def load_images_tk():
-    global GUN_IMG_TK, ROOF_IMG_TK, GROUND_IMG_TK, NGUYEN_SAVIOR_IMG_TK, NGUYEN_NORMAL_IMG_TK, NGUYEN_ZOMBIE_IMG_TK, PROFILE_IMG_TK, PERCENT_IMG_TK
+    global GUN_IMG_TK, ROOF_IMG_TK, GROUND_IMG_TK, NGUYEN_SAVIOR_IMG_TK, NGUYEN_NORMAL_IMG_TK, NGUYEN_ZOMBIE_IMG_TK, PROFILE_IMG_TK, PROFIL_FONT_IMG_TK, PERCENT_IMG_TK
 
     GUN_IMG_TK = load_image_tk(GUN_IMG)
     NGUYEN_NORMAL_IMG_TK = load_image_tk(NGUYEN_NORMAL_IMG)
     NGUYEN_SAVIOR_IMG_TK = load_image_tk(NGUYEN_SAVIOR_IMG)
     NGUYEN_ZOMBIE_IMG_TK = load_image_tk(NGUYEN_ZOMBIE_IMG)
     PROFILE_IMG_TK = load_image_tk(PROFILE_IMG)
+    PROFIL_FONT_IMG_TK = load_image_tk(PROFIL_FONT_IMG)
 
     for img in NUMBERS_IMG:
         NUMBERS_IMG_TK.append(load_image_tk(img))
@@ -103,6 +110,18 @@ def load_images_tk():
 
     for img in GROUND_IMG:
         GROUND_IMG_TK.append(load_image_tk(img))
+
+#############
+# Partie NP #
+#############
+
+def load_images_np():
+    global GUN_IMG_NP
+    
+    GUN_IMG_NP = load_image_np(GUN_IMG)
+
+def load_image_np(img:ImageTk):
+    return np.array(img)[:,:,:3]
 
 
 

@@ -11,7 +11,8 @@ class ZBuffer:
         self.container = container
         self.img_tk = None
         window_dims = option.OPTION.get_window_dimensions()
-        self.buffer = np.zeros([window_dims[1], window_dims[0], 3], dtype=np.uint8)
+        self.clear_buffer = np.zeros([window_dims[1], window_dims[0], 3], dtype=np.uint8)
+        self.buffer = self.clear_buffer.copy()
 
     def set(self, x, y, color):
         self.buffer[y,x] = color
@@ -25,12 +26,17 @@ class ZBuffer:
     def get(self, x, y):
         return self.buffer[y,x]
 
+    def draw_image_np(self, img, line_start, line_end, col_start, col_end, mask=False):
+        if not mask:
+            self.buffer[line_start:line_end, col_start:col_end] = img
+        else:
+            mask = np.all(img != [0, 0, 0], axis=2)
+            self.buffer[line_start:line_end, col_start:col_end][mask] = img[mask]
+
     def show(self):
         img_pil = Image.fromarray(self.buffer)
         self.img_tk = ImageTk.PhotoImage(img_pil)
         self.container["image"] = self.img_tk
 
     def clear(self):
-        window_dims = option.OPTION.get_window_dimensions()
-        self.buffer = np.zeros([window_dims[1], window_dims[0], 3], dtype=np.uint8)
-        self.container["image"] = None
+        self.buffer = self.clear_buffer.copy()

@@ -36,4 +36,5 @@ if __name__ == "__main__":
     dm = DrawerManager()
     fontManager.load_font_tk()
     imageTkManager.load_images_tk()
+    imageTkManager.load_images_np()
     dm.run()

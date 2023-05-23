@@ -37,10 +37,20 @@ class Profile:
                                    image=imageTkManager.PROFILE_IMG_TK)
         
     def draw_player_icon(self):
+        player = game.GAME.get_world().get_player()
+        player_health_percent = player.get_health() / player.get_max_health()
+        img = None
+        if player_health_percent < 0.1:
+            img = imageTkManager.NGUYEN_ZOMBIE_IMG_TK
+        elif player_health_percent < 0.6:
+            img = imageTkManager.NGUYEN_NORMAL_IMG_TK
+        else:
+            img = imageTkManager.NGUYEN_SAVIOR_IMG_TK
+        
         self.__canvas.create_image(self.__upleft_corner[0] + 5, 
                           self.__upleft_corner[0] + 5,
                           anchor=NW,
-                          image=imageTkManager.NGUYEN_SAVIOR_IMG_TK)
+                          image=img)
         
     def draw_health_points(self):
         player = game.GAME.get_world().get_player()

@@ -4,6 +4,7 @@ from tkinter import Canvas
 from logic.utils.vec2D import Vec2D
 from logic.world.world import WORLD_DIM_X, WORLD_DIM_Y
 from logic.entity.player import PLAYER_SIZE_X, PLAYER_SIZE_Y
+from logic.entity.alien import ALIEN_SIZE_X, ALIEN_SIZE_Y
 from logic.world.blockType import BlockType
 import logic.game.option as option
 import logic.utils.mathUtils as mathUtils
@@ -12,6 +13,9 @@ import logic.game.game as game
 
 TAG_OLD_BEAMS = "OLD_BEAM"
 TUPLE_TAG_OLD_BEAMS = (TAG_OLD_BEAMS,)
+
+TAG_OLD_ENTITIES = "OLD_ENTITIES"
+TUPLE_TAG_OLD_ENTITIES = (TAG_OLD_ENTITIES,)
 
 class MinimapFont:
 
@@ -37,6 +41,7 @@ class MinimapFont:
         self.draw_minimap_background()
         self.draw_minimap_grid()
         self.draw_minimap_blocks()
+        self.draw_aliens()
         self.draw_minimap_player()
         self.draw_beams()
 
@@ -70,6 +75,20 @@ class MinimapFont:
         if self.__player_draw_id == -1:
             self.draw_minimap_player()
         self.__canvas.move(self.__player_draw_id, dxy[0] * self.__to_add_x, dxy[1] * self.__to_add_y)
+
+    def draw_aliens(self):
+        for alien in self.__game.get_world().get_aliens():
+            alien_pos = alien.get_pos()
+            self.__canvas.create_oval((alien_pos[0] - 1/2 * ALIEN_SIZE_X) * self.__to_add_x + self.__upleft_corner[0], 
+                                    (alien_pos[1] - 1/2 * ALIEN_SIZE_Y) * self.__to_add_y + self.__upleft_corner[1], 
+                                    (alien_pos[0] + 1/2 * ALIEN_SIZE_X) * self.__to_add_x + self.__upleft_corner[0], 
+                                    (alien_pos[1] + 1/2 * ALIEN_SIZE_Y) * self.__to_add_y + self.__upleft_corner[1], 
+                                    fill="blue",
+                                    tags=TUPLE_TAG_OLD_ENTITIES)
+
+    def on_entities_move_event(self):
+        self.__canvas.delete(TAG_OLD_ENTITIES)
+        self.draw_aliens()
         
     ####################
     #   Dessin blocs   #
@@ -195,3 +214,4 @@ class MinimapFont:
                                          map_space_p2[1] * self.__to_add_y + self.__upleft_corner[1],
                                          fill=color,
                                          tags=TUPLE_TAG_OLD_BEAMS)
+

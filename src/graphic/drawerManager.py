@@ -36,7 +36,7 @@ class DrawerManager:
 
         # Infos
         self.info_drawer = InfoDrawer(master=self.__root)
-        self.info_drawer.pack(side=RIGHT)
+        self.info_drawer.pack(side=RIGHT, fill=BOTH, expand=YES)
 
         # Interface Tkinter
         frame_tkinter = Frame(master=self.__root)
@@ -56,7 +56,14 @@ class DrawerManager:
         self.__tkinter_drawer.init_draw()
         self.info_drawer.draw()
 
+        self.__root.after(1000, self.redraw)
+
         self.__root.mainloop()
+
+    def redraw(self):
+        self.__tkinter_drawer.redraw()
+        self.__root.after(0, self.redraw)
+        
 
     def rotate_player(self, drotation:float):
         self.__player.add_rotation(drotation)

@@ -1,12 +1,15 @@
 from tkinter import Tk, Label
 from math import tan, cos, pi, exp, atan2, sin, atan
+import numpy as np
 
+from time import time
 from logic.utils.vec2D import Vec2D
 import logic.game.game as game
 import logic.game.option as option
 import logic.utils.mathUtils as mathUtils
 import logic.sprite.spriteManager as spriteManager
 import logic.utils.mathUtils as mathUtils
+import logic.imagetk.imageTkManager as imageTkManager
 
 from graphic.tkinter.image.zbuffer import ZBuffer
 
@@ -18,20 +21,36 @@ class GameDrawer:
         self.container.pack(side="left")
         self.zbuffer = ZBuffer(self.container)
 
-    def draw(self):
-        self.create_gun()
-        self.create_gun_sight()
+        self.fps_counter = 0
+        self.fps_current_sec = 0
 
+    def draw(self):
         self.zbuffer.clear()
         self.draw_walls()
         self.draw_entities()
+        self.draw_gun()
+        self.draw_gun_sight()
         self.zbuffer.show()
+
+        self.check_fps()
 
     def redraw(self):
         self.zbuffer.clear()
         self.draw_walls()
         self.draw_entities()
+        self.draw_gun()
+        self.draw_gun_sight()
         self.zbuffer.show()
+
+        self.check_fps()
+
+    def check_fps(self):
+        if int(time()) == self.fps_current_sec:
+            self.fps_counter += 1
+        else:
+            self.fps_current_sec = int(time())
+            print(f"Tk fps: {self.fps_counter}")
+            self.fps_counter = 1
 
     def draw_walls(self):
         fov = option.OPTION.get_fov()
@@ -147,24 +166,21 @@ class GameDrawer:
         screen_height = option.OPTION.get_drawer_dimensions()[1]
         virtual_distance = (screen_width / 2) / (tan((fov/2) * pi / 180))
 
-        aliens_pos = []
-        for alien in game.GAME.get_world().get_aliens():
-            aliens_pos.append(alien.get_pos())
 
         visibles_aliens = player.get_visibles_entity()
         
         for visible_alien in visibles_aliens:
-            pass
+            print(visible_alien)
     
-    def create_gun(self):
-        pass
-        #self.create_image(option.OPTION.get_window_dimensions()[0] // 2 - 6 ,
-        #                  option.OPTION.get_window_dimensions()[1],
-        #                  anchor=S,
-        #                  image=imageTkManager.GUN_IMG_TK, 
-        #                  tags=DEFINITIVE_USE_TAG_2)
+    def draw_gun(self):
+        self.zbuffer.draw_image_np(imageTkManager.GUN_IMG_NP,
+                                    option.OPTION.get_drawer_dimensions()[1] - 127,
+                                    option.OPTION.get_drawer_dimensions()[1], 
+                                    option.OPTION.get_drawer_dimensions()[0] // 2 - 80,
+                                    option.OPTION.get_drawer_dimensions()[0] // 2 + 86,
+                                    mask=True)
         
-    def create_gun_sight(self):
+    def draw_gun_sight(self):
         drawer_dims = option.OPTION.get_drawer_dimensions()
         self.zbuffer.set_line(drawer_dims[1] // 2, 
                               drawer_dims[0] // 2 - 5,
