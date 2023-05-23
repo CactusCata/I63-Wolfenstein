@@ -12,7 +12,7 @@ WORLD_DIM_Y = 16
 
 
 class World:
-    def __init__(self, world_matrix:List[List[BlockType]]):
+    def __init__(self, world_matrix: List[List[BlockType]]):
         self.world_matrix = world_matrix
 
         self.__aliens = []

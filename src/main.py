@@ -28,7 +28,7 @@ if __name__ == "__main__":
     spriteManager.load_images()
 
     print("Create game...")
-    game = Game("empty")
+    game = Game("world")
     game.get_world().spawn_player(position=Vec2D(9.5, 9.5), rotation=180)
     game.get_world().spawn_alien(position=Vec2D(4.0, 4.0), rotation=20)
 

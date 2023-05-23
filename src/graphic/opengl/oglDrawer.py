@@ -21,6 +21,7 @@ class OGLDrawer(OpenGLFrame):
         super().__init__(*args, **kw)
 
         self.player = game.GAME.get_world().get_player()
+        self._d = 0
 
     def initgl(self):
         """
@@ -34,19 +35,19 @@ class OGLDrawer(OpenGLFrame):
 
         glEnable(GL_DEPTH_TEST)
 
-        if not GOD_MODE:
+        if not GOD_MODE or True:
             glEnable(GL_CULL_FACE)
 
         glEnable(GL_LIGHTING)
-        glEnable(GL_COLOR_MATERIAL)
+        # glEnable(GL_COLOR_MATERIAL)
         # glShadeModel(GL_FLAT)
 
         glEnable(GL_LIGHT0)
-        glLightfv(GL_LIGHT0, GL_POSITION, (0, 0, 0, 1))
+        glLightfv(GL_LIGHT0, GL_AMBIENT, (.5, .5, .5, 1))
 
         # 1/(kc + kl.d + kq.d²)
         glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1)
-        glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .5)
+        glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .1)
         glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0)
 
         # Textures
@@ -62,6 +63,12 @@ class OGLDrawer(OpenGLFrame):
 
         print("GL_ERROR:", glGetError())
 
+        # Matériaux
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
+        glMaterialfv(GL_FRONT, GL_AMBIENT, (.5, .5, .5, 1))
+        glMaterialfv(GL_FRONT, GL_SPECULAR, (1, 1, 1, 1))
+        glMaterialf(GL_FRONT, GL_SHININESS, 0)
+
         # Matrice de projection
 
         glViewport(0, 0, self.width, self.height)
@@ -71,7 +78,7 @@ class OGLDrawer(OpenGLFrame):
         glLoadIdentity()
 
         fov = 60 * pi/180
-        z_near = .5
+        z_near = .1
         z_far = sqrt((WORLD_DIM_X * WORLD_DIM_X) + (WORLD_DIM_Y * WORLD_DIM_Y))
 
         r = z_near * tan(fov / 2)
@@ -94,21 +101,18 @@ class OGLDrawer(OpenGLFrame):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glPushMatrix()
-        glLightfv(GL_LIGHT0, GL_POSITION, (0, 0, 0, 1))
-        glMaterialfv(GL_FRONT, GL_AMBIENT, (1, 1, 1, 1))
 
         # Caméra
         if not GOD_MODE:
             #OGLDrawer.draw_flooring()
             #OGLDrawer.draw_ceiling()
 
-            glRotatef(180, 1, 0, 0)
-            glRotatef(-self.player.get_rotation() + 90, 0, 1, 0)
-            glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 0, -self.player.get_pos()[1])
+            glRotatef(self.player.rotation + 90, 0, 1, 0)
+            glTranslatef(-(self.player.x - WORLD_DIM_X / 2), 0, -(self.player.y - WORLD_DIM_Y / 2))
         else:
             glRotatef(-90, 1, 0, 0)
-            glRotatef(self.player.get_rotation() + 90, 0, 1, 0)
-            glTranslatef(-(WORLD_DIM_X - self.player.get_pos()[0]), 10, -self.player.get_pos()[1])
+            glRotatef(-self.player.rotation - 90, 0, 1, 0)
+            glTranslatef(-(self.player.x - WORLD_DIM_X / 2), 10, -(self.player.y - WORLD_DIM_Y / 2))
 
         # Murs
 
@@ -119,7 +123,7 @@ class OGLDrawer(OpenGLFrame):
             for y in range(WORLD_DIM_Y):
                 if self.player.world.world_matrix[y][x] == BlockType.WALL:
                     glPushMatrix()
-                    glTranslatef(WORLD_DIM_X - x, 0, y)
+                    glTranslatef(x - WORLD_DIM_X / 2, 0, y - WORLD_DIM_Y / 2)
                     OGLDrawer.draw_wall()
                     glPopMatrix()
 
@@ -152,37 +156,37 @@ class OGLDrawer(OpenGLFrame):
         glBegin(GL_QUAD_STRIP)
 
         # face arrière
-        glTexCoord2f(1, 0)
+        glTexCoord2f(1, 1)
         glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
 
-        glTexCoord2f(1, 1)
+        glTexCoord2f(1, 0)
         glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
 
-        glTexCoord2f(0, 0)
+        glTexCoord2f(0, 1)
         glVertex3f( .5, -.5, -.5)  # v2 (arrière)
 
-        glTexCoord2f(0, 1)
+        glTexCoord2f(0, 0)
         glVertex3f( .5,  .5, -.5)  # v3 (arrière)
 
         # face droite
-        glTexCoord2f(1, 0)
+        glTexCoord2f(1, 1)
         glVertex3f( .5, -.5,  .5)  # v2 (avant)
 
-        glTexCoord2f(1, 1)
+        glTexCoord2f(1, 0)
         glVertex3f( .5,  .5,  .5)  # v3 (avant)
 
         # face avant
-        glTexCoord2f(0, 0)
+        glTexCoord2f(0, 1)
         glVertex3f(-.5, -.5,  .5)  # v0 (avant)
 
-        glTexCoord2f(0, 1)
+        glTexCoord2f(0, 0)
         glVertex3f(-.5,  .5,  .5)  # v1 (avant)
 
         # face gauche
-        glTexCoord2f(1, 0)
+        glTexCoord2f(1, 1)
         glVertex3f(-.5, -.5, -.5)  # v0 (arrière)
 
-        glTexCoord2f(1, 1)
+        glTexCoord2f(1, 0)
         glVertex3f(-.5,  .5, -.5)  # v1 (arrière)
         glEnd()
 
