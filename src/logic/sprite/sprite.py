@@ -4,6 +4,9 @@ from typing import List, Tuple
 import logic.utils.fileUtils as fileUtils
 
 class Sprite:
+    """
+    Objet utilisé pour le dessin en raycasting
+    """
 
     def __init__(self, path:str) -> None:
         if not fileUtils.file_exist(path):
@@ -20,11 +23,30 @@ class Sprite:
         """
         return self.pixels[int(band_percentage_needed * self.width)]
     
-    def get(self, percent_x, percent_y):
+    def get(self, percent_x: float, percent_y: float) -> Tuple[int]:
+        """Renvoie le triplet (R,G,B) d'une position de l'image
+
+        Args:
+            percent_x (float): ratio de l'emplacement visé en X
+            percent_y (float): ratio de l'emplacement visé en X
+
+        Returns:
+            Tuple[int]: Triplet (R,G,B) d'une position de l'image
+        """
         return self.pixels[int(percent_y * self.width)][int(percent_x * self.height)]
     
-    def get_width(self):
+    def get_width(self) -> int:
+        """Renvoie la largeur de l'image en pixel
+
+        Returns:
+            int: Largeur de l'image en pixel
+        """
         return self.width
     
-    def get_height(self):
+    def get_height(self) -> int:
+        """Renvoie la hauteur de l'image en pixel
+
+        Returns:
+            int: Hauteur de l'image en pixel
+        """
         return self.height

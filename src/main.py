@@ -31,6 +31,8 @@ if __name__ == "__main__":
     game = Game("world")
     game.get_world().spawn_player(position=Vec2D(9.5, 9.5), rotation=180)
     game.get_world().spawn_alien(position=Vec2D(4.0, 4.0), rotation=20)
+    game.get_world().spawn_alien(position=Vec2D(4.0, 8.0), rotation=0)
+    game.get_world().spawn_alien(position=Vec2D(8.0, 8.0), rotation=0)
 
     print("Create window...")
     dm = DrawerManager()

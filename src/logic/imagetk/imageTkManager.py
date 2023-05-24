@@ -20,6 +20,8 @@ NGUYEN_SAVIOR_IMG_TK:ImageTk = None
 NGUYEN_ZOMBIE_IMG:Image = None
 NGUYEN_ZOMBIE_IMG_TK:ImageTk = None
 
+ALIEN_IMG = None
+
 PROFILE_IMG = None
 PROFILE_IMG_TK = None
 
@@ -39,6 +41,19 @@ NUMBERS_IMG_TK = []
 #   Partie Image    #
 #####################
 def load_image(path:str, resize_dims:Vec2D=None, ratio=-1) -> Image:
+    """Charge en mémoire les images
+
+    Args:
+        path (str): chemin
+        resize_dims (Vec2D, optional): Redimensionnement de l'image. Defaults to None.
+        ratio (int, optional): application d'un ratio par rapport à la taille de l'image. Defaults to -1.
+
+    Raises:
+        ValueError: _description_
+
+    Returns:
+        Image: _description_
+    """
     if not fileUtils.file_exist(path):
         raise ValueError(f"The file \"{path}\" do not exist.")
     
@@ -51,13 +66,16 @@ def load_image(path:str, resize_dims:Vec2D=None, ratio=-1) -> Image:
     return img
 
 def load_images():
-    global GUN_IMG, ROOF_IMG, GROUND_IMG, NGUYEN_SAVIOR_IMG, NGUYEN_ZOMBIE_IMG, PROFILE_IMG, NGUYEN_NORMAL_IMG, PROFIL_FONT_IMG
+    """Charge toutes les images
+    """
+    global GUN_IMG, ROOF_IMG, GROUND_IMG, NGUYEN_SAVIOR_IMG, NGUYEN_ZOMBIE_IMG, PROFILE_IMG, NGUYEN_NORMAL_IMG, PROFIL_FONT_IMG, ALIEN_IMG
 
     GUN_IMG = load_image("../res/img/gun_final.png")
-    NGUYEN_ZOMBIE_IMG = load_image("../res/img/nguyen32_zombie.png")
-    NGUYEN_SAVIOR_IMG = load_image("../res/img/nguyen_the_savior.png", resize_dims=Vec2D(64, 64))
-    NGUYEN_NORMAL_IMG = load_image("../res/img/nguyen_normal.png", resize_dims=Vec2D(64, 64))
-    PROFILE_IMG = load_image("../res/img/profile_font.png", ratio=0.25)
+    NGUYEN_ZOMBIE_IMG = load_image("../res/img/nguyen32_zombie.png", resize_dims=Vec2D(80, 80))
+    NGUYEN_SAVIOR_IMG = load_image("../res/img/nguyen_the_savior.png", resize_dims=Vec2D(80, 80))
+    NGUYEN_NORMAL_IMG = load_image("../res/img/nguyen_normal.png", resize_dims=Vec2D(80, 80))
+    PROFILE_IMG = load_image("../res/img/profile_font.png", ratio=0.32)
+    ALIEN_IMG = load_image("../res/img/alien_final.png", ratio=3)
     PROFIL_FONT_IMG = load_image("../res/img/profil_font.png", resize_dims=Vec2D(
         option.OPTION.get_drawer_dimensions()[0], option.OPTION.get_info_dimensions()[1]))
 
@@ -88,11 +106,21 @@ def load_images():
 #  Partie Image Tk  #
 #####################
 def load_image_tk(image:Image) -> ImageTk:
+    """Charge une imageTk à partir d'une image
+
+    Args:
+        image (Image): image source
+
+    Returns:
+        ImageTk: Image chargée
+    """
     image_tk = ImageTk.PhotoImage(image)
     #image.close()
     return image_tk
 
 def load_images_tk():
+    """Charge les imageTk
+    """
     global GUN_IMG_TK, ROOF_IMG_TK, GROUND_IMG_TK, NGUYEN_SAVIOR_IMG_TK, NGUYEN_NORMAL_IMG_TK, NGUYEN_ZOMBIE_IMG_TK, PROFILE_IMG_TK, PROFIL_FONT_IMG_TK, PERCENT_IMG_TK
 
     GUN_IMG_TK = load_image_tk(GUN_IMG)
@@ -116,11 +144,21 @@ def load_images_tk():
 #############
 
 def load_images_np():
+    """Charge la matrice numpy depuis chaque image
+    """
     global GUN_IMG_NP
     
     GUN_IMG_NP = load_image_np(GUN_IMG)
 
-def load_image_np(img:ImageTk):
+def load_image_np(img:Image):
+    """Charge une matrice 
+
+    Args:
+        img (ImageTk): Image
+
+    Returns:
+        Martice numpy: Matrice numpy sans canal alpha
+    """
     return np.array(img)[:,:,:3]
 
 
@@ -129,7 +167,18 @@ def load_image_np(img:ImageTk):
 #   Utils    #
 ##############
 
-def moyenne(img1, img2, coef1:float, coef2:float):
+def moyenne(img1: Image, img2: Image, coef1: float, coef2: float) -> Image:
+    """Renvoie la moyenne de deux images
+
+    Args:
+        img1 (Image): Image A
+        img2 (Image): Image B
+        coef1 (float): coefficent entre 0 et 1
+        coef2 (float): coefficient entre coef1 et 1
+
+    Returns:
+        Image: Image moyénnée
+    """
     arr1 = np.array(img1)
     arr2 = np.array(img2)
 
@@ -141,7 +190,17 @@ def moyenne(img1, img2, coef1:float, coef2:float):
     img_avg = Image.fromarray(arr_avg)
     return img_avg
 
-def generate_mask(height, weight, limit=20) -> List[float]:
+def generate_mask(height: int, weight: int, limit=20) -> List[float]:
+    """Génère un masque de luminosité croissant
+
+    Args:
+        height (int): largeur du masque
+        weight (int): hauteur du masque
+        limit (int, optional): coef a modifier en fonction de la transition. Defaults to 20.
+
+    Returns:
+        List[float]: Liste des coefs de luminosité croissante
+    """
     dark_coefs = []
     for line in range(height):
         dark_coefs.append(exp(-line * limit / (height * weight)))
@@ -149,6 +208,15 @@ def generate_mask(height, weight, limit=20) -> List[float]:
 
 
 def make_darker(img:Image, mask:List[float]) -> Image:
+    """Rend une image plus sombre
+
+    Args:
+        img (Image): Image source
+        mask (List[float]): liste de coefficient
+
+    Returns:
+        Image: _description_
+    """
     arr = np.array(img).astype(np.float64)
     
     for i in range(arr.shape[0]):
@@ -159,4 +227,13 @@ def make_darker(img:Image, mask:List[float]) -> Image:
     return Image.fromarray(arr)
 
 def rotate_image(img:Image, rot_degree:int) -> Image:
+    """Applique une rotation sur une image
+
+    Args:
+        img (Image): image source
+        rot_degree (int): degree de rotation
+
+    Returns:
+        Image: image rotationnée
+    """
     return img.rotate(rot_degree)

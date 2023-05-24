@@ -18,15 +18,22 @@ TAG_OLD_ENTITIES = "OLD_ENTITIES"
 TUPLE_TAG_OLD_ENTITIES = (TAG_OLD_ENTITIES,)
 
 class MinimapFont:
+    """Dessin de la minimap
+    """
 
     def __init__(self, canvas:Canvas):
+        """Constructeur
+
+        Args:
+            canvas (Canvas): Canvas du profil
+        """
         self.__game = game.GAME
         self.__canvas = canvas
         infos_dims = option.OPTION.get_info_dimensions()
         self.__mini_size_px = infos_dims[0]
         
         # Placement (px, py)
-        self.__upleft_corner = Vec2D(0, 100)
+        self.__upleft_corner = Vec2D(0, 150)
         self.__downright_corner = self.__upleft_corner + Vec2D(self.__mini_size_px, self.__mini_size_px)
 
         self.__to_add_x = (self.__downright_corner[0] - self.__upleft_corner[0]) / WORLD_DIM_X
@@ -35,9 +42,16 @@ class MinimapFont:
         self.__player_draw_id = -1
 
     def get_player_hitbox_tk(self):
+        """Renvoie les dimensions de la hitbox du joueur
+
+        Returns:
+            _type_: _description_
+        """
         return self.__canvas.coords(self.__player_draw_id)
 
     def draw(self):
+        """Dessine la minimap
+        """
         self.draw_minimap_background()
         self.draw_minimap_grid()
         self.draw_minimap_blocks()
@@ -46,6 +60,8 @@ class MinimapFont:
         self.draw_beams()
 
     def draw_minimap_background(self):
+        """Dessine le fond de la minimap
+        """
         self.__canvas.create_rectangle(self.__upleft_corner[0], 
                                        self.__upleft_corner[1], 
                                        self.__downright_corner[0], 
@@ -57,6 +73,8 @@ class MinimapFont:
     #   Dessin joueur   #
     #####################
     def draw_minimap_player(self):
+        """Dessine le joueur (point rouge)
+        """
         player = self.__game.get_world().get_player()
         player_pos = player.get_pos()
         self.__player_draw_id = self.__canvas.create_oval((player_pos[0] - 1/2 * PLAYER_SIZE_X) * self.__to_add_x + self.__upleft_corner[0], 
@@ -66,10 +84,17 @@ class MinimapFont:
                                     fill="red")
         
     def on_player_rot_event(self):
+        """Sur la rotation du joueur
+        """
         self.__canvas.delete(TAG_OLD_BEAMS)
         self.draw_beams()
         
     def on_player_move_event(self, dxy:Vec2D):
+        """Sur le déplacement du joueur
+
+        Args:
+            dxy (Vec2D): dxy
+        """
         self.__canvas.delete(TAG_OLD_BEAMS)
         self.draw_beams()
         if self.__player_draw_id == -1:
@@ -77,6 +102,8 @@ class MinimapFont:
         self.__canvas.move(self.__player_draw_id, dxy[0] * self.__to_add_x, dxy[1] * self.__to_add_y)
 
     def draw_aliens(self):
+        """Dessine les aliens
+        """
         for alien in self.__game.get_world().get_aliens():
             alien_pos = alien.get_pos()
             self.__canvas.create_oval((alien_pos[0] - 1/2 * ALIEN_SIZE_X) * self.__to_add_x + self.__upleft_corner[0], 
@@ -87,6 +114,8 @@ class MinimapFont:
                                     tags=TUPLE_TAG_OLD_ENTITIES)
 
     def on_entities_move_event(self):
+        """Redessine les aliens
+        """
         self.__canvas.delete(TAG_OLD_ENTITIES)
         self.draw_aliens()
         
@@ -94,6 +123,8 @@ class MinimapFont:
     #   Dessin blocs   #
     ####################
     def draw_minimap_blocks(self):
+        """Dessine les blocs
+        """
         current_y = self.__upleft_corner[1]
         world = self.__game.get_world()
         for y in range(WORLD_DIM_Y):
@@ -110,6 +141,8 @@ class MinimapFont:
     #   Dessin grille   #
     #####################
     def draw_minimap_grid(self):
+        """Dessine la grille
+        """
         current_y = self.__upleft_corner[1]
         for line in range(WORLD_DIM_Y + 1):
             self.__canvas.create_line(self.__upleft_corner[0], 
@@ -130,13 +163,20 @@ class MinimapFont:
     #   Dessin dda  #
     #################
     def draw_beams(self):
+        """Dessine les rayons
+        """
         fov = option.OPTION.get_fov()
         player_rotation = self.__game.get_world().get_player().get_rotation()
         #self.draw_beam(player_rotation - fov // 2)
         self.draw_beam(player_rotation)
         #self.draw_beam(player_rotation + fov // 2)
 
-    def draw_beam(self, alpha):
+    def draw_beam(self, alpha:float):
+        """Dessine un rayon
+
+        Args:
+            alpha (float): angle en degré
+        """
         alpha %= 360
         if alpha % 90 == 0:
             alpha += 1
@@ -208,6 +248,16 @@ class MinimapFont:
     #   Others  #
     #############
     def draw_line(self, map_space_p1:Vec2D, map_space_p2:Vec2D, color:str=None):
+        """Dessine une ligne
+
+        Args:
+            map_space_p1 (Vec2D): ???
+            map_space_p2 (Vec2D): ???
+            color (str, optional): ???. Defaults to None.
+
+        Returns:
+            _type_: _description_
+        """
         return self.__canvas.create_line(map_space_p1[0] * self.__to_add_x + self.__upleft_corner[0], 
                                          map_space_p1[1] * self.__to_add_y + self.__upleft_corner[1],
                                          map_space_p2[0] * self.__to_add_x + self.__upleft_corner[0],

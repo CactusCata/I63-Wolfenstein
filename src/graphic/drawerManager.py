@@ -9,12 +9,15 @@ from graphic.opengl.oglDrawer import OGLDrawer
 import logic.game.option as option
 import logic.game.game as game
 from logic.utils.vec2D import Vec2D
-from logic.entity.player import PLAYER_STEP_SIZE
+from logic.entity.player import PLAYER_STEP_SIZE, PLAYER_DAMAGE
+from logic.entity.alien import ALIEN_MOVE_FREQUENCY_MS
 
 
 GAME_NAME = "Wolfenstein 2.5D"
 
 class DrawerManager:
+    """Manager de la partie vue
+    """
 
     def __init__(self):
         self.__root = Tk()
@@ -33,6 +36,7 @@ class DrawerManager:
         self.__root.bind('d', lambda event: self.rotate_player(+3))
         self.__root.bind('s', lambda event: self.move_player(-PLAYER_STEP_SIZE))
         self.__root.bind('q', lambda event: self.rotate_player(-3))
+        self.__root.bind('<Button-1>', lambda event: self.player_shoot())
 
         # Infos
         self.info_drawer = InfoDrawer(master=self.__root)
@@ -49,29 +53,53 @@ class DrawerManager:
         self.__ogl_drawer.animate = 1
         self.__ogl_drawer.after(100, self.__ogl_drawer.printContext)
 
-        self.start_ia_aliens()
-
     def run(self):
+        """Dessine les elements à l'écran
+        (A appeler qu'une seule fois)
+        """
         # First draw Tkinter interface
         self.__tkinter_drawer.init_draw()
         self.info_drawer.draw()
 
-        self.__root.after(1000, self.redraw)
+        self.__root.after(1000, self.alien_action)
 
         self.__root.mainloop()
 
     def redraw(self):
+        """Redessine les elements à l'écran
+        """
         self.__tkinter_drawer.redraw()
-        self.__root.after(0, self.redraw)
+
+    def alien_action(self):
+        """Autorise tous les aliens à se déplacer et à effectuer une attaque
+        """
+        for alien in game.GAME.get_world().get_aliens():
+            alien.move()
+            alien.try_attack()
+        
+        self.info_drawer.on_entities_move_event()
+        self.info_drawer.on_player_get_hit()
+        self.redraw()
+        self.__root.after(ALIEN_MOVE_FREQUENCY_MS, self.alien_action)
         
 
     def rotate_player(self, drotation:float):
+        """Fonction appelée lorsque le joueur souhaite se tourner
+
+        Args:
+            drotation (float): delta rotation
+        """
         self.__player.add_rotation(drotation)
 
         self.info_drawer.on_player_rot_event()
         self.__tkinter_drawer.on_player_rot_event()
 
     def move_player(self, step_size:int):
+        """Fonction appelée lorsque le joueur souhaite se déplacer
+
+        Args:
+            step_size (int): taille du pas de déplacement
+        """
         dxy = Vec2D(
             cos(self.__player.get_rotation() * pi / 180) * step_size, 
             sin(self.__player.get_rotation() * pi / 180) * step_size
@@ -82,7 +110,25 @@ class DrawerManager:
             self.info_drawer.on_player_move_event(dxy)
             self.__tkinter_drawer.on_player_move_event(dxy)
 
-    def start_ia_aliens(self):
-        pass
-        #print("to do logic here")
-        #self.__root.after(1000, self.start_logic)
+    def player_shoot(self):
+        """Simule le tir du joueur
+        """
+        if not self.__player.can_shoot():
+            return
+
+        
+        self.__player.use_ammo()
+
+        alien_aimed = self.__player.get_alien_aimed()
+        if alien_aimed != None:
+            alien_aimed.add_damage(PLAYER_DAMAGE)
+
+            if alien_aimed.get_health() == 0:
+                game.GAME.get_world().get_aliens().remove(alien_aimed)
+                self.__player.reset_alien_aimed()
+                self.__player.increase_score()
+                self.__player.add_ammo(4)
+                self.info_drawer.on_player_score_change_event()
+
+        
+        self.info_drawer.on_player_use_ammo_event()

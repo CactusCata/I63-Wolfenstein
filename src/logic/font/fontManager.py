@@ -6,6 +6,11 @@ from logic.utils.vec2D import Vec2D
 from typing import List
 from graphic.tkinter.utils.tkUtils import DEFINITIVE_USE_TAG_TUPLE_2
 
+"""
+Permet de générer du texte depuis une table de symbole
+avec une certaine police d'écriture
+"""
+
 letters = ["!","\"","#","$","%","&","'","(",")","*","+",",","-",
            ".","/","0","1","2","3","4","5","6","7","8","9",":",
            ";","<","=",">","?","@","A","B","C","D","E","F","G",
@@ -20,6 +25,16 @@ char_translation = []
 char_translation_tk = []
 
 def load_font(path:str, ratio=1):
+    """Charge la sprite sheet de symbole depuis un fichier
+
+    Args:
+        path (str): chemin du fichier
+        ratio (int, optional): Ratio par rapport à la taille des caractères. Defaults to 1.
+
+    Raises:
+        ValueError: Si le fichier n'existe pas
+        ValueError: Si la taille des caractères n'a pas été calculée avant
+    """
     if not fileUtils.file_exist(path):
         raise ValueError(f"The file named \"{path}\" do not exist.")
     if letters_px is None:
@@ -39,12 +54,22 @@ def load_font(path:str, ratio=1):
         char_translation.append(char_image)
 
 def load_font_tk():
+    """Charge les images de symbole
+    """
     for img in char_translation:
         image_tk = ImageTk.PhotoImage(img)
         img.close()
         char_translation_tk.append(image_tk)
 
 def init_separators(path:str):
+    """Calcul la taille des symboles en pixel
+
+    Args:
+        path (str): Chemin du fichier
+
+    Raises:
+        ValueError: Si le fichier n'exitste pas
+    """
     if not fileUtils.file_exist(path):
         raise ValueError(f"The file named \"{path}\" do not exist.")
     
@@ -63,7 +88,16 @@ def init_separators(path:str):
             start = c
 
 
-def translate(text:str) -> List:
+def translate(text:str):
+    """Renvoie, pour chaque caractère du texte, une image correspondant
+    au symbole mais dans la police d'écriture prévu.
+
+    Args:
+        text (str): texte à traduire
+
+    Returns:
+        List[ImageTk]: Liste des symboles
+    """
     char_image_tk:List = []
     for c in text:
         if c in letters:
@@ -74,7 +108,18 @@ def translate(text:str) -> List:
             char_image_tk.append(char_translation_tk[letters.index('?')])
     return char_image_tk
 
-def write_text(canvas:Canvas, text:str, pos_nw:Vec2D, char_space_px:int):
+def write_text(canvas:Canvas, text:str, pos_nw:Vec2D, char_space_px:int) -> List[int]:
+    """Ecrit un texte avec la bonne police d'écriture
+
+    Args:
+        canvas (Canvas): canvas de dessin
+        text (str): texte à traduire
+        pos_nw (Vec2D): position de départ d'écriture des symboles
+        char_space_px (int): espace en pixel entre les symboles
+
+    Returns:
+        List[int]: Liste des identifiants de chaque image crée
+    """
     images = translate(text)
 
     imgs_ids = []

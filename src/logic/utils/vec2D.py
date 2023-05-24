@@ -4,6 +4,9 @@ from math import sqrt
 
 
 class Vec2D:
+    """
+    Permet de manipuler des couples.
+    """
     def __init__(self, x: float, y: float):
         self.vect = [x, y]
 

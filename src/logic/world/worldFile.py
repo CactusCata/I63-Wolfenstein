@@ -5,7 +5,7 @@ from logic.world.blockType import BlockType
 
 def load_world_file(path:str) -> World:
     """
-    Charge une world depuis un fichier
+    Charge un monde depuis un fichier
     """
     if not fileUtils.file_exist(path):
         print(f"The file with the path \"{path}\" was not found")

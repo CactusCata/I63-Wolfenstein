@@ -22,6 +22,12 @@ RATIO_GUN_SIGHT_Y = 0.05
 
 
 def place_window(root:Tk, screen_dimensions:Vec2D):
+    """Place la fenetre au milieu de l'écran
+
+    Args:
+        root (Tk): Fenetre Tkinter
+        screen_dimensions (Vec2D): dimensions de l'écran en pixel
+    """
     screenWidth = root.winfo_screenwidth()
     screenHeight = root.winfo_screenheight()
 
@@ -29,5 +35,11 @@ def place_window(root:Tk, screen_dimensions:Vec2D):
     root.geometry(f"{screen_dimensions[0]}x{screen_dimensions[1]}+{(screenWidth - screen_dimensions[0]) // 2}+{(screenHeight - screen_dimensions[1]) // 2}")
 
 def lock_window_dimensions(root:Tk, screen_dimensions:Vec2D):
+    """Bloque les dimentions de la fenetre
+
+    Args:
+        root (Tk): Fenetre Tkinter
+        screen_dimensions (Vec2D): dimensions de l'écran en pixel
+    """
     root.minsize(screen_dimensions[0], screen_dimensions[1])
     root.maxsize(screen_dimensions[0], screen_dimensions[1])

@@ -14,8 +14,15 @@ import logic.imagetk.imageTkManager as imageTkManager
 from graphic.tkinter.image.zbuffer import ZBuffer
 
 class GameDrawer:
+    """Classe du raycastring (dessin du jeu Tkinter)
+    """
 
     def __init__(self, root:Tk):
+        """Constructeur
+
+        Args:
+            root (Tk): Fenetre tkinter
+        """
         screen_dims = option.OPTION.get_drawer_dimensions()
         self.container = Label(master=root, width=screen_dims[0], height=screen_dims[1])
         self.container.pack(side="left")
@@ -25,6 +32,8 @@ class GameDrawer:
         self.fps_current_sec = 0
 
     def draw(self):
+        """Dessine tous les éléments à l'écran
+        """
         self.zbuffer.clear()
         self.draw_walls()
         self.draw_entities()
@@ -35,6 +44,8 @@ class GameDrawer:
         self.check_fps()
 
     def redraw(self):
+        """Redessine tous les éléments à l'écran
+        """
         self.zbuffer.clear()
         self.draw_walls()
         self.draw_entities()
@@ -45,6 +56,8 @@ class GameDrawer:
         self.check_fps()
 
     def check_fps(self):
+        """Affiche les fps
+        """
         if int(time()) == self.fps_current_sec:
             self.fps_counter += 1
         else:
@@ -53,6 +66,8 @@ class GameDrawer:
             self.fps_counter = 1
 
     def draw_walls(self):
+        """Dessine les murs avec l'algo DDA
+        """
         fov = option.OPTION.get_fov()
         world = game.GAME.get_world()
         player = world.get_player()
@@ -158,21 +173,62 @@ class GameDrawer:
             
 
     def draw_entities(self):
-        fov = option.OPTION.get_fov()
+        """Dessine les entités
+        """
         player = game.GAME.get_world().get_player()
-        player_rotation = player.get_rotation()
         player_pos = player.get_pos()
         screen_width = option.OPTION.get_drawer_dimensions()[0]
         screen_height = option.OPTION.get_drawer_dimensions()[1]
-        virtual_distance = (screen_width / 2) / (tan((fov/2) * pi / 180))
+        fov = option.OPTION.get_fov()
 
 
         visibles_aliens = player.get_visibles_entity()
-        
-        for visible_alien in visibles_aliens:
-            print(visible_alien)
+        img_dims = imageTkManager.ALIEN_IMG.size
+
+        player.reset_alien_aimed()
+        for visible_alien, alpha in visibles_aliens:
+            alien_pos = visible_alien.get_pos()
+            distance = mathUtils.euclidian_distance(player_pos[0], player_pos[1], alien_pos[0], alien_pos[1])
+            
+            img = imageTkManager.ALIEN_IMG.resize((int(img_dims[0] / distance), int(img_dims[1] / distance)))
+            new_img_dims = img.size
+            img_np = np.array(img)[:,:,:3]
+            start_line = option.OPTION.get_drawer_dimensions()[1] // 2 - new_img_dims[1] // 2
+            end_line = start_line + new_img_dims[1]
+            start_col = int(((alpha + fov // 2) / fov) * screen_width - new_img_dims[0])
+            end_col = int(start_col + new_img_dims[0])
+            
+            if start_line < 0:
+                to_remove_start_line = -start_line
+                start_line = 0
+                img_np = img_np[to_remove_start_line:,:]
+
+            if end_line >= option.OPTION.get_drawer_dimensions()[1]:
+                to_remove_end_line = end_line - option.OPTION.get_drawer_dimensions()[1] + 1
+                end_line = option.OPTION.get_drawer_dimensions()[1] - 1
+                img_np = img_np[:-to_remove_end_line,:]
+                
+            if start_col < 0:
+                to_remove_col = -start_col
+                start_col = 0
+                img_np = img_np[:,to_remove_col:]
+
+            if end_col >= option.OPTION.get_drawer_dimensions()[0]:
+                to_remove_col = option.OPTION.get_drawer_dimensions()[0] - end_col + 1
+                end_col = option.OPTION.get_drawer_dimensions()[0] - 1
+                img_np = img_np[:,:end_col + 1]
+
+            middle_column = option.OPTION.drawer_dimensions[0] // 2
+
+            if start_col <= middle_column <= end_col:
+                player.set_alien_aimed(visible_alien)
+
+            
+            self.zbuffer.draw_image_np(img_np, start_line, end_line, start_col, end_col, True)
     
     def draw_gun(self):
+        """Dessine le gun
+        """
         self.zbuffer.draw_image_np(imageTkManager.GUN_IMG_NP,
                                     option.OPTION.get_drawer_dimensions()[1] - 127,
                                     option.OPTION.get_drawer_dimensions()[1], 
@@ -181,6 +237,8 @@ class GameDrawer:
                                     mask=True)
         
     def draw_gun_sight(self):
+        """Dessine le viseur
+        """
         drawer_dims = option.OPTION.get_drawer_dimensions()
         self.zbuffer.set_line(drawer_dims[1] // 2, 
                               drawer_dims[0] // 2 - 5,

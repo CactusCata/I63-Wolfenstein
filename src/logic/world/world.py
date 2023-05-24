@@ -1,4 +1,4 @@
-from math import atan2, pi, tan
+from math import atan2, pi, tan, radians, degrees
 from typing import List
 
 import logic.utils.mathUtils as mathUtils
@@ -12,6 +12,11 @@ WORLD_DIM_Y = 16
 
 
 class World:
+    """
+    La classe World permet de manipuler tous les objets quelle
+    contient comme les entités
+    """
+
     def __init__(self, world_matrix: List[List[BlockType]]):
         self.world_matrix = world_matrix
 
@@ -19,11 +24,21 @@ class World:
         self.__player = None
 
     def spawn_player(self, position: Vec2D, rotation: float) -> Player:
+        """
+        Fais apparaitre un joueur
+        """
+        # Impossible si il y a déjà un joueur
+        if self.__player != None:
+            return
+
         player = Player(world=self, position=position, rotation=rotation)
         self.__player = player
         return player
 
     def get_player(self) -> Player:
+        """
+        Renvoie le joueur
+        """
         return self.__player
     
     def spawn_alien(self, position: Vec2D, rotation: float) -> Alien:
@@ -32,19 +47,34 @@ class World:
 
         return alien
 
-    def get_aliens(self):
+    def get_aliens(self) -> List[Alien]:
+        """Renvoie la liste des aliens du jeu
+
+        Returns:
+            List[Alien]: Liste des aliens du monde
+        """
         return self.__aliens
 
     def is_wall_between_entities(self, pos_1: Vec2D, pos_2: Vec2D):
+        """Permet de savoir s'il existe un mur entre deux position
+        du monde
+
+        Args:
+            pos_1 (Vec2D): position A
+            pos_2 (Vec2D): position B
+
+        Returns:
+            bool: True s'il existe un mur entre deux positions du monde, False sinon
+        """
         delta_xy = pos_2 - pos_1
 
         # Calcul de l'angle en radians
         angle_rad = atan2(delta_xy[1], delta_xy[0])
 
         # Conversion en degrés
-        alpha = angle_rad * 180 / pi
+        alpha = degrees(angle_rad)
         distance_to_next_wall, _, _ = self.get_next_wall_distance(pos_1, alpha)
-        distance_to_alien = delta_xy.distance(pos_1)
+        distance_to_alien = pos_2.distance(pos_1)
 
         return distance_to_alien > distance_to_next_wall
 
